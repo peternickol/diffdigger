@@ -1,6 +1,10 @@
-# Diffdigger
+<p align="center">
+  <img src="docs/diffdigger-logo.png" alt="Diffdigger logo: a shovel beside a file diff" width="160" height="160">
+</p>
 
-**Watch code change as agents work.**
+<h1 align="center">Diffdigger</h1>
+
+<p align="center"><strong>Watch code change as agents work.</strong></p>
 
 Diffdigger streams saved file diffs and Git activity from a repository into your
 terminal. Point it at a checkout, leave it running, and follow changes from agents,
