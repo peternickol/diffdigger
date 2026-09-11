@@ -1,0 +1,136 @@
+#!/usr/bin/env python3
+"""Stream colored diffs as files are saved in a repository."""
+import argparse
+import difflib
+import hashlib
+import os
+from pathlib import Path
+import stat
+import subprocess
+import sys
+import time
+
+INTERVAL = 0.5
+MAX_BYTES = 1024 * 1024
+
+
+def git(root, *args):
+    result = subprocess.run(
+        ['git', '-C', str(root), *args], stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE, env={**os.environ, 'GIT_OPTIONAL_LOCKS': '0'},
+        timeout=10,
+    )
+    if result.returncode:
+        raise RuntimeError(result.stderr.decode(errors='replace').strip())
+    return result.stdout
+
+
+def safe(text):
+    # A diff should display file contents, never execute terminal escape sequences.
+    return ''.join(c if c in '\n\t' or (ord(c) >= 32 and not 127 <= ord(c) <= 159)
+                   else f'\\x{ord(c):02x}' for c in text)
+
+
+def filename(name):
+    return safe(name).replace('\n', '\\n').replace('\t', '\\t')
+
+
+def snapshot(root, previous):
+    names = set(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard').split(b'\0'))
+    current = {}
+    for raw in sorted(names - {b''}):
+        name = os.fsdecode(raw)
+        path = root / name
+        old = previous.get(name)
+        try:
+            # Stay in this checkout; do not read through symlinked directories.
+            if path.is_symlink() or any(p.is_symlink() for p in path.parents if p != root and root in p.parents):
+                continue
+            info = path.stat()
+            if not stat.S_ISREG(info.st_mode):
+                continue
+            signature = (info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
+            if old and old[0] == signature:
+                current[name] = old
+                continue
+            if info.st_size > MAX_BYTES:
+                current[name] = (signature, None, signature, 'File exceeds 1 MiB; text diff omitted')
+                continue
+            with path.open('rb') as stream:
+                data = stream.read(MAX_BYTES + 1)
+            after = path.stat()
+            if signature != (after.st_ino, after.st_size, after.st_mtime_ns, after.st_ctime_ns):
+                if old:
+                    current[name] = old  # Try again next tick after the write settles.
+                continue
+            try:
+                text = data.decode('utf-8') if b'\0' not in data else None
+            except UnicodeDecodeError:
+                text = None
+            current[name] = (signature, text, hashlib.sha256(data).digest(), 'Binary/non-UTF-8 file; text diff omitted')
+        except (FileNotFoundError, NotADirectoryError):
+            continue
+        except OSError:
+            # A temporarily unreadable file must not look like a deletion.
+            if old:
+                current[name] = old
+    return current
+
+
+def show(name, before, after, color):
+    def paint(text, code):
+        return f'\033[{code}m{text}\033[0m' if color else text
+
+    action = 'Created' if before is None else 'Deleted' if after is None else 'Modified'
+    name = filename(name)
+    print(paint(f'[{time.strftime("%H:%M:%S")}] {action} {name}', '1;36'))
+    unavailable = [item[3] for item in (before, after) if item is not None and item[1] is None]
+    if unavailable:
+        print('; '.join(dict.fromkeys(unavailable)))
+    else:
+        old = before[1] if before else ''
+        new = after[1] if after else ''
+        lines = difflib.unified_diff(
+            old.splitlines(keepends=True), new.splitlines(keepends=True),
+            fromfile=f'a/{name}' if before else '/dev/null',
+            tofile=f'b/{name}' if after else '/dev/null', n=3,
+        )
+        for line in lines:
+            code = '32' if line.startswith('+') else '31' if line.startswith('-') else '36' if line.startswith('@@') else '0'
+            print(paint(safe(line).rstrip('\n'), code))
+            if not line.endswith('\n'):
+                print('\\ No newline at end of file')
+    print(flush=True)
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('directory', nargs='?', default='.', help='Repository to watch (default: current directory)')
+    args = parser.parse_args()
+    root = Path(args.directory).expanduser().resolve()
+    root = Path(os.fsdecode(git(root, 'rev-parse', '--show-toplevel')).rstrip('\n'))
+    print(f'Diffdigger · {root}', file=sys.stderr)
+    previous = snapshot(root, {})
+    print('Ready. Save a file to see its diff. Ctrl+C to stop.', file=sys.stderr, flush=True)
+    color = sys.stdout.isatty() and 'NO_COLOR' not in os.environ
+    while True:
+        time.sleep(INTERVAL)
+        current = snapshot(root, previous)
+        for name in sorted(previous.keys() | current.keys()):
+            before, after = previous.get(name), current.get(name)
+            if before and after and before[2] == after[2]:
+                continue
+            if after is None and (root / name).exists():
+                continue  # A newly ignored file is not a deleted file.
+            show(name, before, after, color)
+        previous = current
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (KeyboardInterrupt, BrokenPipeError):
+        pass
+    except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+        print(f'diffdigger: {error}', file=sys.stderr)
+        sys.exit(1)
