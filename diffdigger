@@ -123,7 +123,7 @@ class GitActivity:
             renderer.git_event(occurred, text)
 
 
-def snapshot(root, previous, tracking=None):
+def snapshot(root, previous, tracking=None, progress=None):
     """Read the filesystem directly; Git can optionally supply ignore rules."""
     current = {}
     unreadable = []
@@ -137,6 +137,8 @@ def snapshot(root, previous, tracking=None):
     def files():
         for directory, children, names in os.walk(root, onerror=scan_error, followlinks=False):
             directory = Path(directory)
+            if progress:
+                progress.update(directory, len(current), tracking.active if tracking else ())
             ignored = set()
             if tracking:
                 tracking.visit(directory, '.git' in children or '.git' in names)
@@ -155,6 +157,8 @@ def snapshot(root, previous, tracking=None):
                     yield prefix + name, path
 
     for name, path in files():
+        if progress:
+            progress.update(path, len(current), tracking.active if tracking else ())
         old = previous.get(name)
         try:
             # lstat both identifies symlinks and gets the file signature in one call.
@@ -238,6 +242,64 @@ def wrap_cells(text, width):
         line += character
         used += size
     yield line
+
+
+class StartupProgress:
+    """Show baseline work without writing progress into the diff stream."""
+    def __init__(self, plain=False, stream=None, columns=None):
+        self.stream = stream if stream is not None else sys.stderr
+        self.columns = columns
+        self.interactive = self.stream.isatty() and os.environ.get('TERM') != 'dumb' and not plain
+        self.started = time.monotonic()
+        self.last_update = float('-inf')
+        self.files = 0
+        self.repos = set()
+        self.frame = 0
+        self.visible = False
+
+    def __enter__(self):
+        self.update(None, 0, (), force=True)
+        return self
+
+    def __exit__(self, error_type, error, traceback):
+        if error_type is None:
+            elapsed = time.monotonic() - self.started
+            self.write(f'Baseline ready · {self.files:,} files'
+                       f' · {len(self.repos)} Git repos · {elapsed:.1f}s', final=True)
+        elif self.interactive and self.visible:
+            print('\r\033[2K', end='', file=self.stream, flush=True)
+
+    def write(self, text, final=False):
+        if self.interactive:
+            width = max(1, (self.columns or shutil.get_terminal_size((100, 24)).columns) - 1)
+            if cell_width(text) > width:
+                text = next(wrap_cells(text, width - 1)) + '…' if width > 1 else '…'
+            print('\r\033[2K' + text, end='\n' if final else '', file=self.stream, flush=True)
+            self.visible = not final
+        else:
+            print(text, file=self.stream, flush=True)
+
+    def update(self, path, files, repos, force=False):
+        now = time.monotonic()
+        if not force and now - self.last_update < (0.1 if self.interactive else 1.0):
+            return
+        self.last_update = now
+        total_repos = len(self.repos.union(repos))
+        counts = f'{self.files + files:,} files'
+        if total_repos:
+            counts += f' · {total_repos} Git repos'
+        text = f'Building baseline · {counts} · {now - self.started:.1f}s'
+        if path is not None:
+            display = str(path).replace(str(Path.home()), '~', 1)
+            text += ' · ' + filename(display)
+        if self.interactive:
+            text = '⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'[self.frame % 10] + ' ' + text
+            self.frame += 1
+        self.write(text)
+
+    def complete(self, watcher):
+        self.files += len(watcher.previous)
+        self.repos.update(watcher.tracking.active)
 
 
 class Terminal:
@@ -520,11 +582,13 @@ class GitTracking:
 
 
 class Watcher:
-    def __init__(self, root, renderer):
+    def __init__(self, root, renderer, progress=None):
         self.root = root
         self.renderer = renderer
+        if progress:
+            progress.update(root, 0, (), force=True)
         self.tracking = GitTracking(root, renderer)
-        self.previous = snapshot(root, {}, self.tracking)
+        self.previous = snapshot(root, {}, self.tracking, progress)
         self.error = None
 
     def poll(self):
@@ -547,11 +611,16 @@ def main():
     parser.add_argument('directories', nargs='*', help='Directories to watch recursively (default: current directory)')
     parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
     args = parser.parse_args()
-    roots = watch_directories(args.directories or ['.'])
-    labels = repository_labels(roots)
-    multiple = len(roots) > 1
-    watchers = [Watcher(root, Terminal(plain=args.plain, repo=labels[root] if multiple else None, kind='folder'))
-                for root in roots]
+    with StartupProgress(plain=args.plain) as progress:
+        roots = watch_directories(args.directories or ['.'])
+        labels = repository_labels(roots)
+        multiple = len(roots) > 1
+        watchers = []
+        for root in roots:
+            watcher = Watcher(root, Terminal(plain=args.plain, repo=labels[root] if multiple else None,
+                                             kind='folder'), progress)
+            watchers.append(watcher)
+            progress.complete(watcher)
     renderer = Terminal(plain=args.plain)
     if multiple:
         renderer.start_many(roots)

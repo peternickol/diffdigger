@@ -104,6 +104,11 @@ reports it and retries while continuing to watch the other selected directories.
 ## How the live feed works
 
 At startup, Diffdigger takes a snapshot of the selected directories' current files.
+It immediately shows baseline progress with the current path, file count, and
+elapsed time, then reports the final file and Git repo counts before going live.
+Progress updates stay on stderr; interactive terminals update one line, while
+`--plain` and redirected stderr use occasional text lines.
+
 It checks them in turn, then waits half a second between polling rounds.
 Each changed file is compared with its previously observed contents. Existing
 uncommitted changes become the starting baseline; they are not replayed when you

@@ -174,7 +174,11 @@ class RepositoriesTest(unittest.TestCase):
         self.assertIn('[alpha] Watching again.', self.messages.get(timeout=5))
 
     def test_empty_directory_watches_new_files_without_git(self):
-        self.start(cwd=self.parent, env={**os.environ, 'PATH': ''})
+        banner = self.start(cwd=self.parent, env={**os.environ, 'PATH': ''})
+        self.assertTrue(banner.startswith('Building baseline'))
+        self.assertIn('Baseline ready · 0 files', banner)
+        self.assertLess(banner.index('Baseline ready'), banner.index('Ready.'))
+        self.quiet()  # Startup progress must not enter the stdout diff stream.
         directory = self.parent / 'new/nested'
         directory.mkdir(parents=True)
         path = directory / 'code.py'

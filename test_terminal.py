@@ -89,6 +89,33 @@ class TerminalTest(unittest.TestCase):
                     self.assertIn('] Git COMMIT', output)
                     self.assertIn('--- a/code.py\n+++ b/code.py', output)
 
+    def test_startup_progress_fits_the_terminal_and_clears_on_failure(self):
+        stream = TTY()
+        with patch.dict(os.environ, {'TERM': 'xterm', 'NO_COLOR': '1'}):
+            with self.assertRaises(RuntimeError):
+                with APP['StartupProgress'](stream=stream, columns=90) as progress:
+                    progress.update(Path('/tmp/project/\x1b[2J' + '界' * 40), 12345, (), force=True)
+                    raise RuntimeError('scan failed')
+        output = stream.getvalue()
+        self.assertIn('Building baseline', output)
+        self.assertIn('12,345 files', output)
+        self.assertNotIn('\x1b[2J', output)
+        self.assertIn('\\x1b[2J', output)
+        self.assertNotIn('Baseline ready', output)
+        self.assertTrue(output.endswith('\r\x1b[2K'))
+        for frame in output.split('\r'):
+            self.assertLessEqual(APP['cell_width'](frame.replace('\x1b[2K', '')), 89)
+
+    def test_plain_startup_progress_has_no_terminal_control_codes(self):
+        stream = TTY()
+        with APP['StartupProgress'](plain=True, stream=stream) as progress:
+            progress.update(Path('/tmp/project'), 10, (), force=True)
+        output = stream.getvalue()
+        self.assertIn('Building baseline · 10 files', output)
+        self.assertIn('Baseline ready', output)
+        self.assertNotIn('\x1b', output)
+        self.assertNotIn('\r', output)
+
 
 if __name__ == '__main__':
     unittest.main()
