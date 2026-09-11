@@ -63,6 +63,9 @@ class DiffdiggerTest(unittest.TestCase):
         self.assertIn('-before\n+first save', self.change())
         self.git('add', 'code.py')
         self.git('commit', '-qm', 'commit while watching')
+        event = self.change()
+        self.assertIn('Git COMMIT', event)
+        self.assertIn('commit while watching', event)
         self.quiet()
         path.write_text('second save\n')
         diff = self.change()
@@ -110,6 +113,57 @@ class DiffdiggerTest(unittest.TestCase):
         (self.root / '.gitignore').write_text('ignored/\n*.log\ncontrol.py\n')
         self.assertIn('Modified .gitignore', self.change())
         self.quiet()
+
+    def test_push_fetch_and_pull_with_a_local_remote(self):
+        self.git('commit', '-qm', 'initial commit')
+        self.assertIn('Git COMMIT', self.change())
+        remote = Path(self.temp.name) / 'remote.git'
+        subprocess.run(['git', 'init', '--bare', '-q', '--initial-branch=main', str(remote)], check=True)
+        self.git('remote', 'add', 'origin', str(remote))
+        self.git('push', '-u', 'origin', 'HEAD:main')
+        self.assertIn('Git PUSH origin/main', self.change())
+        self.quiet()
+
+        peer = Path(self.temp.name) / 'peer'
+        subprocess.run(['git', 'clone', '-q', str(remote), str(peer)], check=True)
+        (peer / 'code.py').write_text('change from a peer\n')
+        def peer_git(*args):
+            subprocess.run(['git', '-C', str(peer), '-c', 'user.name=Peer',
+                            '-c', 'user.email=peer@example.invalid', *args], check=True,
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        peer_git('add', 'code.py')
+        peer_git('commit', '-qm', 'remote change')
+        peer_git('push', 'origin', 'main')
+        self.git('fetch', 'origin')
+        self.assertIn('Git FETCH origin/main', self.change())
+        self.quiet()  # Fetching does not change working files or create a local commit.
+
+        self.git('pull', '--ff-only', 'origin', 'main')
+        records = self.change() + '\n' + self.change()
+        self.assertIn('Git PULL HEAD', records)
+        self.assertIn('-before\n+change from a peer', records)
+        self.quiet()
+
+        # A fetch with no ref updates still writes FETCH_HEAD.
+        self.git('fetch', 'origin')
+        self.assertIn('Git FETCH/PULL activity', self.change())
+        self.quiet()
+        # An up-to-date push leaves no record: never invent a success event.
+        self.git('push', 'origin', 'HEAD:main')
+        self.quiet()
+
+    def test_multiple_commits_and_reflog_rewrite(self):
+        self.git('commit', '-qm', 'first commit')
+        self.git('commit', '--allow-empty', '-qm', 'second commit')
+        records = [self.change(), self.change()]
+        self.assertIn('Git COMMIT', records[0])
+        self.assertIn('first commit', records[0])
+        self.assertIn('second commit', records[1])
+        self.quiet()
+        self.git('reflog', 'expire', '--expire=never', '--all')
+        self.quiet()  # Rewriting the log must not replay its history.
+        self.git('commit', '--allow-empty', '-qm', 'after log rewrite')
+        self.assertIn('after log rewrite', self.change())
 
 
 if __name__ == '__main__':

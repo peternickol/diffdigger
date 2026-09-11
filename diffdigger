@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stream colored diffs as files are saved in a repository."""
+"""Stream live file diffs and Git activity in a repository."""
 import argparse
 import difflib
 import hashlib
@@ -33,6 +33,94 @@ def safe(text):
 
 def filename(name):
     return safe(name).replace('\n', '\\n').replace('\t', '\\t')
+
+
+def stamp(path):
+    try:
+        info = path.stat()
+        return info.st_dev, info.st_ino, info.st_size, info.st_mtime_ns
+    except OSError:
+        return None
+
+
+class GitActivity:
+    """Follow new local records without replaying history or configuring Git."""
+    def __init__(self, root):
+        paths = git(root, 'rev-parse', '--path-format=absolute',
+                    '--git-path', 'logs/HEAD', '--git-path', 'logs/refs/remotes',
+                    '--git-path', 'FETCH_HEAD').decode(errors='surrogateescape').splitlines()
+        self.head, self.remotes, self.fetch_head = map(Path, paths)
+        self.positions = {}
+        for path, ref in self.logs():
+            info = stamp(path)
+            if info:
+                self.positions[path] = (info[:2], info[2])
+        self.fetched = stamp(self.fetch_head)
+
+    def logs(self):
+        yield self.head, 'HEAD'
+        if self.remotes.is_dir():
+            for path in sorted(self.remotes.rglob('*')):
+                relative = path.relative_to(self.remotes)
+                # The remote's HEAD alias is bookkeeping, not another transfer.
+                if len(relative.parts) == 2 and relative.name == 'HEAD':
+                    continue
+                if path.is_file() and not path.name.endswith('.lock'):
+                    yield path, relative.as_posix()
+
+    def read(self, path):
+        info = stamp(path)
+        if not info:
+            self.positions.pop(path, None)
+            return []
+        identity, position = self.positions.get(path, (info[:2], 0))
+        if identity != info[:2] or info[2] < position:
+            # Expiring/rewriting a reflog is not a new batch of Git operations.
+            self.positions[path] = (info[:2], info[2])
+            return []
+        try:
+            with path.open('rb') as stream:
+                stream.seek(position)
+                data = stream.read()
+        except OSError:
+            return []
+        end = data.rfind(b'\n') + 1
+        self.positions[path] = (info[:2], position + end)
+        return data[:end].splitlines()
+
+    def poll(self, color):
+        events = []
+        for path, ref in self.logs():
+            for line in self.read(path):
+                try:
+                    metadata, message = line.split(b'\t', 1)
+                    fields = metadata.split()
+                    commit = fields[1].decode()[:8]
+                    occurred = int(fields[-2])
+                    message = message.decode(errors='replace')
+                    action, _, detail = message.partition(': ')
+                    command = action.split()[0]
+                except (ValueError, IndexError):
+                    continue
+                if command == 'commit' and ref == 'HEAD':
+                    text = f'COMMIT {commit} · {detail}'
+                elif command in ('fetch', 'pull'):
+                    text = f'{command.upper()} {ref} → {commit} · {detail}'
+                elif message == 'update by push':
+                    text = f'PUSH {ref} → {commit}'
+                else:
+                    continue
+                events.append((occurred, command, text))
+        fetched = stamp(self.fetch_head)
+        if fetched and fetched != self.fetched and not any(e[1] in ('fetch', 'pull') for e in events):
+            # FETCH_HEAD can change even when no refs move. It cannot tell us
+            # whether the caller was fetch or pull, or prove command success.
+            events.append((time.time(), 'fetch', 'FETCH/PULL activity · FETCH_HEAD updated'))
+        self.fetched = fetched
+        for occurred, command, text in sorted(events, key=lambda event: event[0]):
+            line = f'[{time.strftime("%H:%M:%S", time.localtime(occurred))}] Git {filename(text)}'
+            print(f'\033[1;35m{line}\033[0m' if color else line)
+            print(flush=True)
 
 
 def snapshot(root, previous):
@@ -110,11 +198,13 @@ def main():
     root = Path(args.directory).expanduser().resolve()
     root = Path(os.fsdecode(git(root, 'rev-parse', '--show-toplevel')).rstrip('\n'))
     print(f'Diffdigger · {root}', file=sys.stderr)
+    activity = GitActivity(root)
     previous = snapshot(root, {})
-    print('Ready. Save a file to see its diff. Ctrl+C to stop.', file=sys.stderr, flush=True)
+    print('Ready. Watching file saves and Git activity. Ctrl+C to stop.', file=sys.stderr, flush=True)
     color = sys.stdout.isatty() and 'NO_COLOR' not in os.environ
     while True:
         time.sleep(INTERVAL)
+        activity.poll(color)
         current = snapshot(root, previous)
         for name in sorted(previous.keys() | current.keys()):
             before, after = previous.get(name), current.get(name)
