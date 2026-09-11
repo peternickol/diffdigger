@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Install or update Diffdigger from a published GitHub release."""
+"""Install or update Diffdigger directly from its GitHub repository."""
 # MIT License
 #
 # Copyright (c) 2026 Peter Nickol
@@ -24,31 +24,24 @@
 
 import argparse
 import ast
-import hashlib
-import json
+import io
 import os
 from pathlib import Path
-import re
 import shlex
 import sys
 import tempfile
 import urllib.error
 import urllib.request
+import zipfile
 
 APP_ID = 'diffdigger-update'
 VERSION = '0.1.0'
 MIN_PYTHON = (3, 10)
 REPOSITORY = 'peternickol/diffdigger'
-API = f'https://api.github.com/repos/{REPOSITORY}/releases'
-DOWNLOADS = f'https://github.com/{REPOSITORY}/releases/download'
-MAX_DOWNLOAD = 2 * 1024 * 1024
-PROGRAMS = ('diffdigger', 'diffdigger-update')
-
-
-def version_tuple(version):
-    if not re.fullmatch(r'(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)', version):
-        raise RuntimeError(f'Invalid release version: {version!r}')
-    return tuple(map(int, version.split('.')))
+SOURCE_URL = f'https://codeload.github.com/{REPOSITORY}/zip/refs/heads/master'
+MAX_DOWNLOAD = 16 * 1024 * 1024
+MAX_PROGRAM = 2 * 1024 * 1024
+PROGRAMS = {'diffdigger': 'diffdigger', 'diffdigger-update': 'install.py'}
 
 
 def program_version(data, name):
@@ -62,9 +55,8 @@ def program_version(data, name):
                     if isinstance(target, ast.Name):
                         values[target.id] = node.value.value
         version = values.get('VERSION')
-        if values.get('APP_ID') != name or not isinstance(version, str):
+        if values.get('APP_ID') != name or not isinstance(version, str) or not version:
             raise ValueError('Missing program identity or version')
-        version_tuple(version)
         return version
     except (SyntaxError, UnicodeError, ValueError, TypeError) as error:
         raise RuntimeError(f'{name} is not a recognized Diffdigger program: {error}') from None
@@ -72,9 +64,7 @@ def program_version(data, name):
 
 def download(url):
     request = urllib.request.Request(url, headers={
-        'Accept': 'application/vnd.github+json' if url.startswith(API) else 'application/octet-stream',
         'User-Agent': f'diffdigger-installer/{VERSION}',
-        'X-GitHub-Api-Version': '2026-03-10',
     })
     try:
         with urllib.request.urlopen(request, timeout=30) as response:
@@ -84,7 +74,7 @@ def download(url):
     except urllib.error.HTTPError as error:
         error.close()
         if error.code == 404:
-            raise RuntimeError('Release or asset not found. A published release is required; draft releases are not installable.') from None
+            raise RuntimeError('Repository download not found. Check that peternickol/diffdigger and its master branch are public.') from None
         if error.code in (403, 429):
             raise RuntimeError('GitHub refused the request or its rate limit was reached. Try again later.') from None
         raise RuntimeError(f'Download failed: HTTP {error.code}') from None
@@ -95,53 +85,36 @@ def download(url):
     return data
 
 
-def release_payload(version=None):
-    if version:
-        version = version.removeprefix('v')
-        version_tuple(version)
-    url = f'{API}/tags/v{version}' if version else f'{API}/latest'
+def repository_payload():
+    """Read both programs from one repository snapshot without extracting files."""
+    data = download(SOURCE_URL)
     try:
-        release = json.loads(download(url))
-        tag = release['tag_name']
-        if not isinstance(tag, str) or not tag.startswith('v'):
-            raise ValueError('Invalid release tag')
-        offered = tag[1:]
-        version_tuple(offered)
-        if release.get('draft') or release.get('prerelease'):
-            raise ValueError('Only published stable releases can be installed')
-        if version and offered != version:
-            raise ValueError('Release version does not match the requested version')
-        assets = {asset['name']: asset for asset in release['assets']}
-        payload = {}
-        for name in PROGRAMS:
-            asset = assets[name]
-            expected_url = f'{DOWNLOADS}/{tag}/{name}'
-            digest = asset.get('digest', '')
-            if asset['browser_download_url'] != expected_url:
-                raise ValueError(f'Unexpected download URL for {name}')
-            if not isinstance(digest, str) or not re.fullmatch(r'sha256:[a-f0-9]{64}', digest):
-                raise ValueError(f'GitHub did not provide a SHA-256 digest for {name}')
-            data = download(expected_url)
-            if hashlib.sha256(data).hexdigest() != digest[7:]:
-                raise ValueError(f'Checksum mismatch for {name}; installed files were not changed')
-            if program_version(data, name) != offered:
-                raise ValueError(f'Version mismatch in {name}')
-            payload[name] = data
-        return offered, payload
-    except (KeyError, TypeError, ValueError) as error:
-        raise RuntimeError(f'Invalid release metadata or download: {error}') from None
+        with zipfile.ZipFile(io.BytesIO(data)) as archive:
+            payload = {}
+            for name, source in PROGRAMS.items():
+                member = archive.getinfo(f'diffdigger-master/{source}')
+                if member.file_size > MAX_PROGRAM:
+                    raise ValueError(f'{source} exceeds the expected size limit')
+                payload[name] = archive.read(member)
+    except (zipfile.BadZipFile, KeyError, ValueError) as error:
+        raise RuntimeError(f'Invalid repository download: {error}') from None
+    return checked_payload(payload)
+
+
+def checked_payload(payload):
+    versions = {program_version(data, name) for name, data in payload.items()}
+    if len(versions) != 1:
+        raise RuntimeError('The application and installer have different versions.')
+    return versions.pop(), payload
 
 
 def local_payload(directory):
     directory = Path(directory).expanduser().resolve()
-    payload = {name: (directory / name).read_bytes() for name in PROGRAMS}
-    versions = {program_version(data, name) for name, data in payload.items()}
-    if len(versions) != 1:
-        raise RuntimeError('The local release files have different versions.')
-    return versions.pop(), payload
+    payload = {name: (directory / source).read_bytes() for name, source in PROGRAMS.items()}
+    return checked_payload(payload)
 
 
-def install(bin_dir, version, payload, allow_downgrade=False):
+def install(bin_dir, version, payload):
     bin_dir = Path(bin_dir).expanduser().resolve()
     targets = {name: bin_dir / name for name in PROGRAMS}
     for name, target in targets.items():
@@ -150,13 +123,11 @@ def install(bin_dir, version, payload, allow_downgrade=False):
         if target.exists():
             if not target.is_file():
                 raise RuntimeError(f'Not a regular file: {target}')
-            # Source checkouts should be updated with Git, not overwritten by a release.
+            # Source checkouts should be updated with Git.
             if any((parent / '.git/HEAD').is_file() or (parent / '.git').is_file()
                    for parent in (bin_dir, *bin_dir.parents)):
                 raise RuntimeError(f'Refusing to overwrite a source checkout: {target}')
-            current = program_version(target.read_bytes(), name)
-            if not allow_downgrade and version_tuple(current) > version_tuple(version):
-                raise RuntimeError(f'{name} {current} is newer than release {version}; no downgrade was performed.')
+            program_version(target.read_bytes(), name)
     if all(target.is_file() and target.read_bytes() == payload[name] and os.access(target, os.X_OK)
            for name, target in targets.items()):
         print(f'Diffdigger {version} is already installed in {bin_dir}.')
@@ -224,18 +195,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     default_dir = default_bin_dir(__file__)
     parser.add_argument('--bin-dir', default=str(default_dir), help='Installation directory (default: ~/.local/bin, or this updater\'s directory)')
-    parser.add_argument('--version', help='Install a specific published version, e.g. 0.1.0; permits an intentional downgrade')
-    parser.add_argument('--from-dir', help='Install trusted local release files without downloading')
+    parser.add_argument('--from-dir', help='Install from a local source checkout without downloading')
     args = parser.parse_args()
     if sys.version_info < MIN_PYTHON:
         parser.error('Python 3.10 or newer is required.')
     if os.name != 'posix':
         parser.error('The installer supports Linux and macOS. On Windows, use WSL.')
-    if args.version and args.from_dir:
-        parser.error('--version cannot be combined with --from-dir.')
-    print('Preparing local files…' if args.from_dir else 'Checking published Diffdigger releases…', flush=True)
-    version, payload = local_payload(args.from_dir) if args.from_dir else release_payload(args.version)
-    install(args.bin_dir, version, payload, allow_downgrade=bool(args.version))
+    print('Preparing local files…' if args.from_dir else 'Downloading Diffdigger from GitHub…', flush=True)
+    version, payload = local_payload(args.from_dir) if args.from_dir else repository_payload()
+    install(args.bin_dir, version, payload)
 
 
 if __name__ == '__main__':

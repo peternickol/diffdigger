@@ -1,7 +1,5 @@
 from contextlib import redirect_stdout
-import hashlib
 import io
-import json
 import os
 from pathlib import Path
 import runpy
@@ -11,10 +9,10 @@ import tempfile
 import unittest
 from unittest.mock import patch
 import urllib.error
+import zipfile
 
 ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = runpy.run_path(str(ROOT / 'install.py'))
-BUILDER = runpy.run_path(str(ROOT / 'tools/build_release.py'))
 
 
 class Response(io.BytesIO):
@@ -31,14 +29,16 @@ class InstallTest(unittest.TestCase):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name).resolve()
-        self.dist = self.root / 'release'
-        self.version = BUILDER['build'](self.dist)
-        _, self.payload = INSTALLER['local_payload'](self.dist)
+        self.source = self.root / 'source'
+        self.source.mkdir()
+        self.version, self.payload = INSTALLER['local_payload'](ROOT)
+        for name, source in INSTALLER['PROGRAMS'].items():
+            (self.source / source).write_bytes(self.payload[name])
         self.bin = self.root / 'bin with spaces'
 
-    def install(self, version=None, payload=None, **kwargs):
+    def install(self, version=None, payload=None):
         with redirect_stdout(io.StringIO()):
-            INSTALLER['install'](self.bin, version or self.version, payload or self.payload, **kwargs)
+            INSTALLER['install'](self.bin, version or self.version, payload or self.payload)
 
     def newer(self):
         version = '99.0.0'
@@ -46,25 +46,25 @@ class InstallTest(unittest.TestCase):
                    for name, data in self.payload.items()}
         return version, payload
 
-    def remote(self, version, payload):
-        assets = []
-        urls = {}
-        for name, data in payload.items():
-            url = f'{INSTALLER["DOWNLOADS"]}/v{version}/{name}'
-            urls[url] = data
-            assets.append({'name': name, 'browser_download_url': url,
-                           'digest': 'sha256:' + hashlib.sha256(data).hexdigest()})
-        metadata = {'tag_name': f'v{version}', 'draft': False, 'prerelease': False, 'assets': assets}
-        def open_url(request, timeout):
-            self.assertTrue(request.full_url.startswith('https://'))
-            self.assertEqual(timeout, 30)
-            data = json.dumps(metadata).encode() if request.full_url.startswith(INSTALLER['API']) else urls[request.full_url]
-            return Response(data, request.full_url)
-        return metadata, urls, open_url
+    def archive(self, payload):
+        stream = io.BytesIO()
+        with zipfile.ZipFile(stream, 'w') as archive:
+            for name, data in payload.items():
+                archive.writestr(f'diffdigger-master/{INSTALLER["PROGRAMS"][name]}', data)
+            # The installer only reads the two programs; other entries are never extracted.
+            archive.writestr('../unexpected-file', 'must not be written')
+        return stream.getvalue()
 
-    def test_clean_install_and_repeat_update_from_local_artifacts(self):
+    def remote(self, data):
+        def open_url(request, timeout):
+            self.assertEqual(request.full_url, INSTALLER['SOURCE_URL'])
+            self.assertEqual(timeout, 30)
+            return Response(data, request.full_url)
+        return open_url
+
+    def test_clean_install_and_repeat_update_from_local_source(self):
         result = subprocess.run(
-            [sys.executable, str(ROOT / 'install.py'), '--from-dir', str(self.dist), '--bin-dir', str(self.bin)],
+            [sys.executable, str(ROOT / 'install.py'), '--from-dir', str(self.source), '--bin-dir', str(self.bin)],
             check=True, capture_output=True, text=True,
         )
         self.assertIn('Installed Diffdigger', result.stdout)
@@ -75,7 +75,7 @@ class InstallTest(unittest.TestCase):
         version = subprocess.check_output([str(self.bin / 'diffdigger'), '--version'], text=True)
         self.assertEqual(version.strip(), f'diffdigger {self.version}')
         repeated = subprocess.run(
-            [str(self.bin / 'diffdigger-update'), '--from-dir', str(self.dist)],
+            [str(self.bin / 'diffdigger-update'), '--from-dir', str(self.source)],
             check=True, capture_output=True, text=True,
         )
         self.assertIn('already installed', repeated.stdout)
@@ -94,57 +94,47 @@ class InstallTest(unittest.TestCase):
         self.install()
         self.assertEqual(INSTALLER['default_bin_dir'](self.bin / 'diffdigger-update'), self.bin)
 
-    def test_download_and_update_a_verified_release(self):
+    def test_update_downloads_one_snapshot_even_without_a_version_bump(self):
         self.install()
-        version, payload = self.newer()
-        _, _, opener = self.remote(version, payload)
-        with patch('urllib.request.urlopen', side_effect=opener):
-            offered, downloaded = INSTALLER['release_payload']()
-        self.install(offered, downloaded)
+        payload = {name: data + b'\n# next commit\n' for name, data in self.payload.items()}
+        with patch('urllib.request.urlopen', side_effect=self.remote(self.archive(payload))) as opener:
+            with patch.object(sys, 'argv', ['install.py', '--bin-dir', str(self.bin)]), redirect_stdout(io.StringIO()):
+                INSTALLER['main']()
+        opener.assert_called_once()
         for name, data in payload.items():
             self.assertEqual((self.bin / name).read_bytes(), data)
         result = subprocess.check_output([str(self.bin / 'diffdigger'), '--version'], text=True)
-        self.assertEqual(result.strip(), f'diffdigger {version}')
+        self.assertEqual(result.strip(), f'diffdigger {self.version}')
+        self.assertEqual(set(path.name for path in self.root.iterdir()), {'source', 'bin with spaces'})
 
-    def test_checksum_failure_leaves_existing_installation_untouched(self):
+    def test_bad_downloads_leave_existing_installation_untouched(self):
         self.install()
-        version, payload = self.newer()
-        _, urls, opener = self.remote(version, payload)
-        urls[f'{INSTALLER["DOWNLOADS"]}/v{version}/diffdigger'] += b'\n# corrupt download\n'
-        with patch('urllib.request.urlopen', side_effect=opener), redirect_stdout(io.StringIO()):
-            with patch.object(sys, 'argv', ['install.py', '--bin-dir', str(self.bin)]):
-                with self.assertRaisesRegex(RuntimeError, 'Checksum mismatch'):
-                    INSTALLER['main']()
-        for name, data in self.payload.items():
-            self.assertEqual((self.bin / name).read_bytes(), data)
-
-    def test_release_metadata_cannot_change_the_source_or_skip_verification(self):
-        for case in ('url', 'digest', 'draft', 'prerelease', 'version'):
-            with self.subTest(case=case):
-                metadata, _, opener = self.remote(self.version, self.payload)
-                if case == 'url':
-                    metadata['assets'][0]['browser_download_url'] = 'https://example.invalid/diffdigger'
-                elif case == 'digest':
-                    metadata['assets'][0]['digest'] = None
-                elif case == 'version':
-                    metadata['tag_name'] = 'not-a-version'
-                else:
-                    metadata[case] = True
-                with patch('urllib.request.urlopen', side_effect=opener):
+        _, newer = self.newer()
+        downloads = {
+            'invalid archive': b'<html>server error</html>',
+            'missing installer': self.archive({'diffdigger': self.payload['diffdigger']}),
+            'invalid program': self.archive({**self.payload, 'diffdigger': b'not a Python program'}),
+            'version mismatch': self.archive({**self.payload, 'diffdigger': newer['diffdigger']}),
+        }
+        for case, download in downloads.items():
+            with self.subTest(case=case), patch('urllib.request.urlopen', side_effect=self.remote(download)):
+                with patch.object(sys, 'argv', ['install.py', '--bin-dir', str(self.bin)]), redirect_stdout(io.StringIO()):
                     with self.assertRaises(RuntimeError):
-                        INSTALLER['release_payload']()
+                        INSTALLER['main']()
+                for name, data in self.payload.items():
+                    self.assertEqual((self.bin / name).read_bytes(), data)
 
     def test_network_errors_are_actionable(self):
         errors = (
-            (urllib.error.HTTPError(INSTALLER['API'], 404, 'Not found', {}, None), 'published release'),
-            (urllib.error.HTTPError(INSTALLER['API'], 403, 'Forbidden', {}, None), 'rate limit'),
+            (urllib.error.HTTPError(INSTALLER['SOURCE_URL'], 404, 'Not found', {}, None), 'Repository download not found'),
+            (urllib.error.HTTPError(INSTALLER['SOURCE_URL'], 403, 'Forbidden', {}, None), 'rate limit'),
             (urllib.error.URLError('offline'), 'Download failed'),
         )
         for error, message in errors:
             with self.subTest(error=error):
                 with patch('urllib.request.urlopen', side_effect=error):
                     with self.assertRaisesRegex(RuntimeError, message):
-                        INSTALLER['release_payload']()
+                        INSTALLER['repository_payload']()
 
     def test_partial_replacement_failure_restores_the_old_programs(self):
         self.install()
@@ -169,7 +159,7 @@ class InstallTest(unittest.TestCase):
             self.install()
         self.assertEqual(program.read_text(), 'unrelated program\n')
         program.unlink()
-        program.symlink_to(self.dist / 'diffdigger')
+        program.symlink_to(self.source / 'diffdigger')
         with self.assertRaisesRegex(RuntimeError, 'symlink'):
             self.install()
         self.assertTrue(program.is_symlink())
@@ -180,21 +170,6 @@ class InstallTest(unittest.TestCase):
         with self.assertRaisesRegex(RuntimeError, 'source checkout'):
             self.install()
         self.assertEqual(program.read_bytes(), self.payload['diffdigger'])
-
-    def test_downgrade_requires_an_explicit_version(self):
-        version, payload = self.newer()
-        self.install(version, payload)
-        with self.assertRaisesRegex(RuntimeError, 'no downgrade'):
-            self.install()
-        self.install(allow_downgrade=True)
-        self.assertEqual((self.bin / 'diffdigger').read_bytes(), self.payload['diffdigger'])
-
-    def test_build_checks_tag_and_writes_matching_checksums(self):
-        with self.assertRaisesRegex(RuntimeError, 'does not match'):
-            BUILDER['build'](self.root / 'bad-release', tag='v99.0.0')
-        for line in (self.dist / 'SHA256SUMS').read_text().splitlines():
-            digest, name = line.split('  ')
-            self.assertEqual(hashlib.sha256((self.dist / name).read_bytes()).hexdigest(), digest)
 
     def test_program_metadata_is_inspected_without_execution(self):
         data = b"raise RuntimeError('must not execute')\nAPP_ID = 'diffdigger'\nVERSION = '1.2.3'\n"

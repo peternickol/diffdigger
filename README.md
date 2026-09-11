@@ -20,10 +20,10 @@ Requires **Python 3.10 or newer**. Git is optional: it adds commit/transfer even
 and Git ignore filtering. The executable uses only the Python standard library;
 there are no packages to install or services to start.
 
-### Install a published release
+### Install
 
 ```bash
-curl -fsSL https://github.com/peternickol/diffdigger/releases/latest/download/diffdigger-update -o diffdigger-install.py &&
+curl -fsSL https://raw.githubusercontent.com/peternickol/diffdigger/master/install.py -o diffdigger-install.py &&
 python3 diffdigger-install.py
 ```
 
@@ -32,8 +32,7 @@ This installs `diffdigger` and `diffdigger-update` into `~/.local/bin`, without
 command to add it. It does not edit shell configuration. To choose another
 directory, pass `--bin-dir ~/bin` to the installer.
 
-The installer requires a published stable GitHub release. Tags and draft releases
-alone are not installable. For unreleased changes, run from source below.
+The installer downloads the current `master` branch directly from the repository.
 
 ```bash
 diffdigger ~/projects
@@ -67,17 +66,12 @@ diffdigger --version
 diffdigger --update
 ```
 
-`diffdigger-update` runs the same updater. It downloads the latest stable release,
-checks GitHub's SHA-256 asset digests and the program versions, and stages both
-programs before replacing them. Failed downloads leave the installed copy intact.
+`diffdigger-update` runs the same updater. It downloads the current `master` branch
+over HTTPS and stages both programs before replacing them. Failed downloads leave
+the installed copy intact. Updates pick up new commits even if the version number
+has not changed.
 Updates happen only when requested; there are no background update checks.
 Restart running watchers after updating to use the new version.
-
-For a specific stable version, including an intentional downgrade:
-
-```bash
-diffdigger-update --version 0.1.0
-```
 
 Source checkouts should be updated with Git. To uninstall a default installation,
 remove its two files:
@@ -230,13 +224,12 @@ network access needed.
 
 ```bash
 python3 -m unittest -v
-python3 tools/build_release.py
 ```
 
-To try an installation from the generated files without downloading anything:
+To install from your local source checkout without downloading anything:
 
 ```bash
-python3 install.py --from-dir dist --bin-dir /tmp/diffdigger-check/bin
+python3 install.py --from-dir . --bin-dir /tmp/diffdigger-check/bin
 /tmp/diffdigger-check/bin/diffdigger --version
 ```
 
@@ -248,9 +241,9 @@ python3 tools/preview.py
 
 The generated image is [`docs/terminal.svg`](docs/terminal.svg).
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and development, the
-[changelog](CHANGELOG.md) for versions, and [release instructions](docs/RELEASING.md)
-for building and publishing releases manually.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and development, and the
+[changelog](CHANGELOG.md) for versions. Pushing changes to `master` makes them
+available to the installer and updater.
 
 ## License
 

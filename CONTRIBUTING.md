@@ -12,15 +12,16 @@ From the repository root, run:
 
 ```bash
 python3 -m unittest -v
-python3 tools/build_release.py
 git diff --check
 ```
 
 Installer tests use temporary directories and simulated GitHub responses. They
-do not download releases or modify your installed copy. When changing the terminal
+do not download from GitHub or modify your installed copy. When changing the terminal
 renderer, regenerate the example with `python3 tools/preview.py`.
 
 Run checks locally before submitting changes. Keep the minimum supported Python
 version (3.10) in mind when using standard-library APIs.
 
-For publishing, see [the release instructions](docs/RELEASING.md).
+The installer and updater download directly from `master`. Push changes there to
+make them available to users. Keep `VERSION` in `diffdigger` and `install.py` in
+sync when changing the version number.

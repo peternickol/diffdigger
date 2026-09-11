@@ -647,7 +647,7 @@ class Watcher:
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--version', action='version', version=f'diffdigger {VERSION}')
-    parser.add_argument('--update', action='store_true', help='Update an installer-managed copy to the latest release')
+    parser.add_argument('--update', action='store_true', help='Update an installed copy from the GitHub repository')
     parser.add_argument('directories', nargs='*', help='Directories to watch recursively (default: current directory)')
     parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
     args = parser.parse_args()
