@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stream live file diffs and Git activity in a repository."""
+"""Stream live file diffs and Git activity across repositories."""
 import argparse
 import difflib
 import hashlib
@@ -126,15 +126,25 @@ class GitActivity:
 def snapshot(root, previous):
     names = set(git(root, 'ls-files', '-z', '--cached', '--others', '--exclude-standard').split(b'\0'))
     current = {}
+    directories = {root: True}
     for raw in sorted(names - {b''}):
         name = os.fsdecode(raw)
         path = root / name
         old = previous.get(name)
         try:
-            # Stay in this checkout; do not read through symlinked directories.
-            if path.is_symlink() or any(p.is_symlink() for p in path.parents if p != root and root in p.parents):
+            # Check each parent once per snapshot, rather than for every file.
+            # Rebuild this cache each round so replaced directories are checked again.
+            unchecked = []
+            parent = path.parent
+            while parent not in directories:
+                unchecked.append(parent)
+                parent = parent.parent
+            for parent in reversed(unchecked):
+                directories[parent] = directories[parent.parent] and not parent.is_symlink()
+            if not directories[path.parent]:
                 continue
-            info = path.stat()
+            # lstat both identifies symlinks and gets the file signature in one call.
+            info = path.lstat()
             if not stat.S_ISREG(info.st_mode):
                 continue
             signature = (info.st_ino, info.st_size, info.st_mtime_ns, info.st_ctime_ns)
@@ -165,14 +175,15 @@ def snapshot(root, previous):
     return current
 
 
-def show(name, before, after, color, stream=None):
+def show(name, before, after, color, stream=None, repo=None):
     stream = stream if stream is not None else sys.stdout
     def paint(text, code):
         return f'\033[{code}m{text}\033[0m' if color else text
 
     action = 'Created' if before is None else 'Deleted' if after is None else 'Modified'
     name = filename(name)
-    print(paint(f'[{time.strftime("%H:%M:%S")}] {action} {name}', '1;36'), file=stream)
+    label = f' [{filename(repo)}]' if repo is not None else ''
+    print(paint(f'[{time.strftime("%H:%M:%S")}]{label} {action} {name}', '1;36'), file=stream)
     unavailable = [item[3] for item in (before, after) if item is not None and item[1] is None]
     if unavailable:
         print('; '.join(dict.fromkeys(unavailable)), file=stream)
@@ -219,9 +230,10 @@ class Terminal:
         'removed': '38;2;255;158;172;48;2;53;33;43',
     }
 
-    def __init__(self, plain=False, stream=None, columns=None):
+    def __init__(self, plain=False, stream=None, columns=None, repo=None):
         self.stream = stream if stream is not None else sys.stdout
         self.columns = columns
+        self.repo = repo
         self.tty = self.stream.isatty() and os.environ.get('TERM') != 'dumb' and not plain
         self.color = self.tty and 'NO_COLOR' not in os.environ
 
@@ -265,7 +277,7 @@ class Terminal:
 
     def start(self, root):
         if not self.pretty:
-            print(f'Diffdigger · {root}', file=sys.stderr)
+            print(f'Diffdigger · {filename(str(root))}', file=sys.stderr)
             print('Ready. Watching file saves and Git activity. Ctrl+C to stop.', file=sys.stderr, flush=True)
             return
         self.line()
@@ -279,17 +291,37 @@ class Terminal:
         self.line()
         self.stream.flush()
 
+    def start_many(self, roots):
+        title = f'{len(roots)} repositories'
+        if not self.pretty:
+            print(f'Diffdigger · {title}', file=sys.stderr)
+            for root in roots:
+                print(f'  {filename(str(root))}', file=sys.stderr)
+            print('Ready. Watching file saves and Git activity. Ctrl+C to stop.', file=sys.stderr, flush=True)
+            return
+        self.line()
+        self.header('DIFFDIGGER', '● LIVE', 'cyan', 'green')
+        self.paragraph(title, 'blue')
+        for root in roots:
+            self.paragraph(filename(str(root).replace(str(Path.home()), '~', 1)), 'muted')
+        self.border('├', '┤')
+        self.paragraph('File diffs + Git activity   ·   Ctrl+C to stop', 'muted')
+        self.close()
+
     def git_event(self, occurred, text):
         clock = time.strftime('%H:%M:%S', time.localtime(occurred))
         text = filename(text)
         if not self.pretty:
-            self.line(f'[{clock}] Git {text}')
+            label = f' [{filename(self.repo)}]' if self.repo is not None else ''
+            self.line(f'[{clock}]{label} Git {text}')
             self.line()
             self.stream.flush()
             return
         action, _, detail = text.partition(' ')
         style = {'COMMIT': 'purple', 'PUSH': 'cyan', 'PULL': 'blue', 'FETCH': 'green'}.get(action, 'muted')
         self.header('GIT / ' + action, clock, style)
+        if self.repo is not None:
+            self.paragraph('repo · ' + filename(self.repo), 'cyan')
         reference, separator, message = detail.partition(' · ')
         self.paragraph(reference, style)
         if separator and message:
@@ -298,7 +330,7 @@ class Terminal:
 
     def file_event(self, name, before, after):
         if not self.pretty:
-            show(name, before, after, self.color, self.stream)
+            show(name, before, after, self.color, self.stream, self.repo)
             return
         action = 'CREATED' if before is None else 'DELETED' if after is None else 'MODIFIED'
         accent = 'green' if before is None else 'red' if after is None else 'blue'
@@ -310,6 +342,8 @@ class Terminal:
         added = sum(j2 - j1 for tag, i1, i2, j1, j2 in operations if tag in ('insert', 'replace'))
         removed = sum(i2 - i1 for tag, i1, i2, j1, j2 in operations if tag in ('delete', 'replace'))
         self.header(action, time.strftime('%H:%M:%S'), accent)
+        if self.repo is not None:
+            self.paragraph('repo · ' + filename(self.repo), 'cyan')
         name = filename(name)
         counts = f'+{added}  −{removed}' if not unavailable else ''
         if cell_width(name) + cell_width(counts) + 3 <= self.width - 2:
@@ -357,29 +391,91 @@ class Terminal:
         self.close()
 
 
-def main():
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directory', nargs='?', default='.', help='Repository to watch (default: current directory)')
-    parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
-    args = parser.parse_args()
-    root = Path(args.directory).expanduser().resolve()
-    root = Path(os.fsdecode(git(root, 'rev-parse', '--show-toplevel')).rstrip('\n'))
-    renderer = Terminal(plain=args.plain)
-    activity = GitActivity(root)
-    previous = snapshot(root, {})
-    renderer.start(root)
-    while True:
-        time.sleep(INTERVAL)
-        activity.poll(renderer)
-        current = snapshot(root, previous)
-        for name in sorted(previous.keys() | current.keys()):
-            before, after = previous.get(name), current.get(name)
+def repositories(directories, all_repos=False):
+    roots = {}
+    for directory in directories:
+        path = Path(directory).expanduser().resolve()
+        if not path.is_dir():
+            raise RuntimeError(f'Not a directory: {path}')
+        if all_repos:
+            # Scan only direct children, never dependencies or nested repos.
+            candidates = [child for child in sorted(path.iterdir())
+                          if not child.is_symlink() and child.is_dir() and (child / '.git').exists()]
+        else:
+            candidates = [path]
+        for candidate in candidates:
+            root = Path(os.fsdecode(git(candidate, 'rev-parse', '--show-toplevel')).rstrip('\n')).resolve()
+            roots[root] = None
+    if not roots:
+        raise RuntimeError('No repositories found in the immediate child directories.')
+    return list(roots)
+
+
+def repository_labels(roots):
+    names = [root.name for root in roots]
+    return {root: root.name if names.count(root.name) == 1 else str(root) for root in roots}
+
+
+class Watcher:
+    def __init__(self, root, renderer):
+        self.root = root
+        self.renderer = renderer
+        self.activity = GitActivity(root)
+        self.previous = snapshot(root, {})
+        self.error = None
+
+    def poll(self):
+        # Do not fall back to an enclosing checkout if this repo is removed.
+        if not (self.root / '.git').exists():
+            raise RuntimeError('Repository is unavailable; waiting for it to return')
+        self.activity.poll(self.renderer)
+        current = snapshot(self.root, self.previous)
+        for name in sorted(self.previous.keys() | current.keys()):
+            before, after = self.previous.get(name), current.get(name)
             if before and after and before[2] == after[2]:
                 continue
-            if after is None and (root / name).exists():
+            if after is None and (self.root / name).exists():
                 continue  # A newly ignored file is not a deleted file.
-            renderer.file_event(name, before, after)
-        previous = current
+            self.renderer.file_event(name, before, after)
+        self.previous = current
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('directories', nargs='*', help='Repositories to watch (default: current directory)')
+    parser.add_argument('--all', action='store_true', help='Watch repositories in each directory\'s immediate subdirectories')
+    parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
+    args = parser.parse_args()
+    roots = repositories(args.directories or ['.'], args.all)
+    labels = repository_labels(roots)
+    multiple = args.all or len(roots) > 1
+    watchers = [Watcher(root, Terminal(plain=args.plain, repo=labels[root] if multiple else None))
+                for root in roots]
+    renderer = Terminal(plain=args.plain)
+    if multiple:
+        renderer.start_many(roots)
+    else:
+        renderer.start(roots[0])
+    while True:
+        time.sleep(INTERVAL)
+        for watcher in watchers:
+            try:
+                watcher.poll()
+            except BrokenPipeError:
+                raise
+            except (OSError, RuntimeError, subprocess.TimeoutExpired) as error:
+                if not multiple:
+                    raise
+                message = str(error)
+                if message != watcher.error:
+                    print(f'diffdigger: [{filename(labels[watcher.root])}] {filename(message)}',
+                          file=sys.stderr, flush=True)
+                watcher.error = message
+            else:
+                if watcher.error:
+                    print(f'diffdigger: [{filename(labels[watcher.root])}] Watching again.',
+                          file=sys.stderr, flush=True)
+                watcher.error = None
 
 
 if __name__ == '__main__':

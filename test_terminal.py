@@ -67,6 +67,28 @@ class TerminalTest(unittest.TestCase):
                 self.assertIn('-old\n+new', output)
                 self.assertNotIn('╭', output)
 
+    def test_repository_labels_on_diff_and_git_events(self):
+        for columns in (35, 50, 100):
+            with self.subTest(columns=columns):
+                stream = TTY()
+                label = 'team/' + '界' * 20 + '\x1b[2J'
+                with patch.dict(os.environ, {'TERM': 'xterm'}):
+                    terminal = APP['Terminal'](stream=stream, columns=columns, repo=label)
+                    terminal.file_event('code.py', ((), 'old\n', None, ''), ((), 'new\n', None, ''))
+                    terminal.git_event(0, 'COMMIT 1234abcd · Save code')
+                output = ANSI.sub('', stream.getvalue())
+                self.assertEqual(output.count('team/'), 2)
+                self.assertEqual(output.count('界'), 40)
+                self.assertNotIn('\x1b', output)
+                if columns >= 50:
+                    self.assertEqual(output.count('repo · '), 2)
+                    for line in output.splitlines():
+                        self.assertLessEqual(APP['cell_width'](line), columns, line)
+                else:
+                    self.assertIn('] Modified code.py', output)
+                    self.assertIn('] Git COMMIT', output)
+                    self.assertIn('--- a/code.py\n+++ b/code.py', output)
+
 
 if __name__ == '__main__':
     unittest.main()
