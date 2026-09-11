@@ -224,8 +224,9 @@ or streaming it publicly. Ignored files can appear if Git is unavailable.
 
 ## Development
 
-The watcher and terminal renderer live in [`diffdigger`](diffdigger). Tests use
-temporary repositories and local remotes, with no network access needed.
+The watcher and terminal renderer live in [`diffdigger`](diffdigger). Tests live
+in [`tests/`](tests/) and use temporary repositories and local remotes, with no
+network access needed.
 
 ```bash
 python3 -m unittest -v

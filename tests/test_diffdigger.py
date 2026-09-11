@@ -7,7 +7,7 @@ import tempfile
 import threading
 import unittest
 
-SCRIPT = Path(__file__).with_name('diffdigger')
+SCRIPT = Path(__file__).resolve().parents[1] / 'diffdigger'
 
 
 class DiffdiggerTest(unittest.TestCase):

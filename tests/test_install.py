@@ -12,7 +12,7 @@ import unittest
 from unittest.mock import patch
 import urllib.error
 
-ROOT = Path(__file__).resolve().parent
+ROOT = Path(__file__).resolve().parents[1]
 INSTALLER = runpy.run_path(str(ROOT / 'install.py'))
 BUILDER = runpy.run_path(str(ROOT / 'tools/build_release.py'))
 

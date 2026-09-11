@@ -11,7 +11,7 @@ import threading
 import unittest
 from unittest.mock import patch
 
-SCRIPT = Path(__file__).with_name('diffdigger')
+SCRIPT = Path(__file__).resolve().parents[1] / 'diffdigger'
 APP = runpy.run_path(str(SCRIPT))
 
 

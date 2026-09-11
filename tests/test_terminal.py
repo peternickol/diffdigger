@@ -6,7 +6,7 @@ import runpy
 import unittest
 from unittest.mock import patch
 
-APP = runpy.run_path(str(Path(__file__).with_name('diffdigger')))
+APP = runpy.run_path(str(Path(__file__).resolve().parents[1] / 'diffdigger'))
 ANSI = re.compile(r'\x1b\[[0-9;]*m')
 
 
