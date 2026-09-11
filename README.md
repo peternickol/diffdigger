@@ -1,53 +1,126 @@
 # Diffdigger
 
-A live stream of code diffs and Git activity in your terminal.
+**Watch code change as agents work.**
+
+Diffdigger streams saved file diffs and Git activity from a repository into your
+terminal. Point it at a checkout, leave it running, and follow changes from agents,
+editors, or scripts as they happen.
 
 ![Diffdigger terminal preview with sample events](docs/terminal.svg)
 
+*Preview uses sample events.*
+
+## Quick start
+
+Requires **Python 3** and **Git**. Tested on Linux. The executable uses only the
+Python standard library; there are no packages to install or services to start.
+
 ```bash
-./diffdigger ~/temp/electrologytraining.com
+git clone https://github.com/peternickol/diffdigger.git
+cd diffdigger
+./diffdigger /path/to/repo
 ```
 
-Requires Python 3 and Git. No packages, server, configuration, or installation.
-Omit the directory to watch the current repository. Press **Ctrl+C** to stop.
+Use the path to the repository you want to watch. Press **Ctrl+C** to stop.
 
-Interactive terminals show file cards with timestamps, old/new line numbers,
-change counts, and tinted diff rows. Git events have distinct colored cards.
-Long lines wrap, and earlier events stay in your terminal's scrollback.
+## What you see
 
-Use `--plain` for compact unified diffs. Redirected output and very narrow
-terminals use the plain layout automatically. `NO_COLOR=1` disables colors.
+- **Saved changes:** created, modified, and deleted files, with additions and
+  deletions shown as they are observed.
+- **Readable diffs:** timestamps, old/new line numbers, change counts, surrounding
+  context, and colored rows. Long lines wrap to fit the terminal.
+- **Git activity:** commit, push, pull, and fetch events when Git leaves a local
+  record that Diffdigger can detect.
+- **A continuous feed:** earlier events stay in your terminal's scrollback.
+  Staging and committing do not reset the file diff baseline.
 
-The current files become the starting baseline. Each subsequent save prints its
-diff against the previously observed contents, with green additions and red
-deletions. Staging and committing do not reset the feed.
-
-Git activity appears in the same stream:
+## Usage
 
 ```text
-[14:32:08] Git COMMIT a1b2c3d4 · Fix validation
-[14:32:10] Git PUSH origin/main → a1b2c3d4
-[14:32:15] Git FETCH origin/main → e5f6a7b8 · fast-forward
-[14:32:17] Git PULL HEAD → e5f6a7b8 · Fast-forward
+diffdigger [--plain] [directory]
 ```
 
-This reads new entries from Git's local reflog files and watches `FETCH_HEAD`.
-It requires no hooks or Git configuration changes and does not replay old commits.
-If only `FETCH_HEAD` changes, the entry says **FETCH/PULL activity** because that
-file cannot distinguish those commands or prove they succeeded. Pushes appear
-when Git records a remote-tracking ref update; failed/up-to-date pushes and other
-operations that leave no local record are not visible. This is local activity
-monitoring, not remote polling or a complete command audit.
+Run the executable by its path, or put it on your `PATH` to use `diffdigger`
+from anywhere. The directory defaults to the current repository.
 
-See Git's [reflog](https://git-scm.com/docs/git-reflog) and
-[fetch](https://git-scm.com/docs/git-fetch) documentation for those local records.
+```bash
+# Watch a specific checkout
+./diffdigger ~/projects/my-app
 
-The first version watches one checkout, checking every half-second. It includes
-tracked and untracked files, respects Git ignore rules, and skips symlinks and
-submodules. Rapid saves between checks are combined. Binary/non-UTF-8 files and
-files over 1 MiB get a change summary. Only saved changes after startup appear.
+# Watch the current repository (when diffdigger is on PATH)
+diffdigger
 
-Diffdigger reads files and keeps its baseline in memory. It never changes your repo.
+# Use compact unified diffs without cards or colors
+./diffdigger --plain /path/to/repo
 
-Run the tests with `python3 -m unittest -v`.
-Regenerate the sample terminal preview with `python3 tools/preview.py`.
+# Keep the cards but disable colors
+NO_COLOR=1 ./diffdigger /path/to/repo
+```
+
+Interactive terminals show decorated cards. Redirected output and very narrow
+terminals use a plain layout automatically. `--plain` disables both cards and
+colors; `NO_COLOR=1` disables colors.
+
+## How the live feed works
+
+At startup, Diffdigger takes a snapshot of the repository's current files. Every
+half-second, it checks for changes and compares each changed file with its
+previously observed contents. Existing uncommitted changes become the starting
+baseline; they are not replayed when you launch it.
+
+This lets you follow work before it reaches a commit. Only saved changes appear,
+and several saves between checks may appear as a single diff.
+
+Tracked files and untracked files allowed by Git's ignore rules are included.
+Diffdigger reads the repository and keeps its baseline in memory. It does not
+modify files, install hooks, or change Git configuration.
+
+## Git activity
+
+Git events appear alongside file diffs. Diffdigger reads new entries in local
+reflog files and watches `FETCH_HEAD`; it does not contact remotes or replay old
+commits.
+
+| Event | What triggers it |
+| --- | --- |
+| **COMMIT** | A new commit entry in the checkout's HEAD reflog. |
+| **PUSH** | A remote-tracking reflog records an update by push. |
+| **PULL** | A HEAD or remote-tracking reflog records a pull. |
+| **FETCH** | A remote-tracking reflog records a fetch. |
+| **FETCH/PULL activity** | `FETCH_HEAD` changes without a corresponding fetch or pull reflog event in that check. |
+
+`FETCH_HEAD` alone cannot distinguish a fetch from a pull or prove the command
+succeeded. Failed or up-to-date pushes, and other operations that leave no
+applicable local record, are not visible. Git activity detection relies on
+file-based reflogs; repositories with reflogs disabled or reftable storage will
+have limited coverage. This feed is not a complete command history.
+
+## Current limits
+
+- Watches one checkout at a time. Other worktrees need their own instance.
+- Skips symlinks and submodule contents.
+- Reports a change summary for binary/non-UTF-8 files and files larger than
+  1 MiB, without a text diff.
+- Shows renames as a deletion and a creation.
+- Observes saved file changes; it cannot identify which agent or process made them.
+
+## Development
+
+The watcher and terminal renderer live in [`diffdigger`](diffdigger). Tests use
+temporary repositories and local remotes, with no network access needed.
+
+```bash
+python3 -m unittest -v
+```
+
+To regenerate the sample terminal preview from the renderer:
+
+```bash
+python3 tools/preview.py
+```
+
+The generated image is [`docs/terminal.svg`](docs/terminal.svg).
+
+## License
+
+[MIT](LICENSE) — Copyright (c) 2026 Peter Nickol.
