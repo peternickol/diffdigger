@@ -16,9 +16,30 @@ scripts as they happen. Git activity appears alongside the diffs when available.
 
 ## Quick start
 
-Requires **Python 3**. Git is optional: it adds commit/transfer events and Git
-ignore filtering. Tested on Linux. The executable uses only the Python standard
-library; there are no packages to install or services to start.
+Requires **Python 3.10 or newer**. Git is optional: it adds commit/transfer events
+and Git ignore filtering. The executable uses only the Python standard library;
+there are no packages to install or services to start.
+
+### Install a published release
+
+```bash
+curl -fsSL https://github.com/peternickol/diffdigger/releases/latest/download/diffdigger-update -o diffdigger-install.py &&
+python3 diffdigger-install.py
+```
+
+This installs `diffdigger` and `diffdigger-update` into `~/.local/bin`, without
+`sudo`. If that directory is missing from your `PATH`, the installer prints the
+command to add it. It does not edit shell configuration. To choose another
+directory, pass `--bin-dir ~/bin` to the installer.
+
+The installer requires a published stable GitHub release. Tags and draft releases
+alone are not installable. For unreleased changes, run from source below.
+
+```bash
+diffdigger ~/projects
+```
+
+### Run from source
 
 ```bash
 git clone https://github.com/peternickol/diffdigger.git
@@ -27,8 +48,6 @@ cd diffdigger
 ```
 
 Use the path to any directory you want to watch. Press **Ctrl+C** to stop.
-You can also download the `diffdigger` script directly and run it with
-`python3 diffdigger /path/to/folder`; cloning the project is optional.
 
 For example, watch your projects and the loose files alongside them:
 
@@ -38,6 +57,41 @@ For example, watch your projects and the loose files alongside them:
 
 Omit the path to watch your current directory and its subdirectories. No Git
 repository, staging, or commits are required for file diffs.
+
+### Update or uninstall
+
+For an installer-managed copy:
+
+```bash
+diffdigger --version
+diffdigger --update
+```
+
+`diffdigger-update` runs the same updater. It downloads the latest stable release,
+checks GitHub's SHA-256 asset digests and the program versions, and stages both
+programs before replacing them. Failed downloads leave the installed copy intact.
+Updates happen only when requested; there are no background update checks.
+Restart running watchers after updating to use the new version.
+
+For a specific stable version, including an intentional downgrade:
+
+```bash
+diffdigger-update --version 0.1.0
+```
+
+Source checkouts should be updated with Git. To uninstall a default installation,
+remove its two files:
+
+```bash
+rm ~/.local/bin/diffdigger ~/.local/bin/diffdigger-update
+```
+
+### Platforms
+
+Linux is tested locally. CI is configured for Linux and macOS with Python 3.10
+and 3.14; check its results for the release you use. Native Windows installation
+is not supported; use WSL. A recent Git version is needed for optional Git
+activity and ignore filtering.
 
 ## What you see
 
@@ -152,12 +206,22 @@ a complete command history.
 
 ## Current limits
 
+- Checks periodically, so intermediate saves between scans can be combined.
+  Large trees take longer to scan and use more memory for their baseline.
 - Skips symlinks and `.git` metadata. Checked-out submodule files are watched
   like other nested directories.
 - Reports a change summary for binary/non-UTF-8 files and files larger than
   1 MiB, without a text diff.
 - Shows renames as a deletion and a creation.
 - Observes saved file changes; it cannot identify which agent or process made them.
+
+## Privacy and shared output
+
+Normal watching stays local: there is no telemetry, hosted service, or network
+polling. Only the installer/updater contacts GitHub. File contents are kept in
+memory for the baseline and printed to your terminal; Diffdigger does not redact
+secrets. Check terminal output for credentials or private code before sharing it
+or streaming it publicly. Ignored files can appear if Git is unavailable.
 
 ## Development
 
@@ -166,6 +230,14 @@ temporary repositories and local remotes, with no network access needed.
 
 ```bash
 python3 -m unittest -v
+python3 tools/build_release.py
+```
+
+To try an installation from the generated files without downloading anything:
+
+```bash
+python3 install.py --from-dir dist --bin-dir /tmp/diffdigger-check/bin
+/tmp/diffdigger-check/bin/diffdigger --version
 ```
 
 To regenerate the sample terminal preview from the renderer:
@@ -175,6 +247,11 @@ python3 tools/preview.py
 ```
 
 The generated image is [`docs/terminal.svg`](docs/terminal.svg).
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and development, the
+[changelog](CHANGELOG.md) for versions, and [release instructions](docs/RELEASING.md)
+for publishing. The release workflow creates a draft after the test matrix passes;
+publication is a separate step.
 
 ## License
 

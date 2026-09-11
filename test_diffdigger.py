@@ -14,7 +14,7 @@ class DiffdiggerTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.root = Path(self.temp.name) / 'repo with spaces'
+        self.root = Path(self.temp.name).resolve() / 'repo with spaces'
         self.root.mkdir()
         self.git('init', '-q')
         (self.root / 'code.py').write_text('before\n')

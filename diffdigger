@@ -1,5 +1,27 @@
 #!/usr/bin/env python3
 """Stream live file diffs from directories, with optional Git activity."""
+# MIT License
+#
+# Copyright (c) 2026 Peter Nickol
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
 import argparse
 import difflib
 import hashlib
@@ -12,6 +34,9 @@ import sys
 import time
 import unicodedata
 
+APP_ID = 'diffdigger'
+VERSION = '0.1.0'
+MIN_PYTHON = (3, 10)
 INTERVAL = 0.5
 MAX_BYTES = 1024 * 1024
 
@@ -51,6 +76,8 @@ class GitActivity:
         paths = git(root, 'rev-parse', '--path-format=absolute',
                     '--git-path', 'logs/HEAD', '--git-path', 'logs/refs/remotes',
                     '--git-path', 'FETCH_HEAD').decode(errors='surrogateescape').splitlines()
+        if len(paths) != 3:
+            raise RuntimeError('Git returned unsupported metadata paths.')
         self.head, self.remotes, self.fetch_head = map(Path, paths)
         self.positions = {}
         for path, ref in self.logs():
@@ -619,9 +646,20 @@ class Watcher:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--version', action='version', version=f'diffdigger {VERSION}')
+    parser.add_argument('--update', action='store_true', help='Update an installer-managed copy to the latest release')
     parser.add_argument('directories', nargs='*', help='Directories to watch recursively (default: current directory)')
     parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
     args = parser.parse_args()
+    if sys.version_info < MIN_PYTHON:
+        parser.error('Python 3.10 or newer is required.')
+    if args.update:
+        if args.directories or args.plain:
+            parser.error('--update cannot be combined with watching options.')
+        updater = Path(__file__).resolve().with_name('diffdigger-update')
+        if not updater.is_file():
+            parser.error('This copy has no installed updater. Run the installer, or update your source checkout with Git.')
+        raise SystemExit(subprocess.call([sys.executable, str(updater)]))
     with StartupProgress(plain=args.plain) as progress:
         roots = watch_directories(args.directories or ['.'])
         labels = repository_labels(roots)

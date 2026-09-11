@@ -19,7 +19,7 @@ class RepositoriesTest(unittest.TestCase):
     def setUp(self):
         self.temp = tempfile.TemporaryDirectory()
         self.addCleanup(self.temp.cleanup)
-        self.parent = Path(self.temp.name)
+        self.parent = Path(self.temp.name).resolve()
 
     def git(self, root, *args):
         return subprocess.run(
@@ -197,6 +197,12 @@ class RepositoriesTest(unittest.TestCase):
         self.assertIn('-before\n+no git needed', self.event())
         (root / '.git/description').write_text('metadata is excluded\n')
         self.quiet()
+
+    def test_unusual_git_metadata_paths_do_not_stop_file_watching(self):
+        root = self.repo('repo\nwith newline')
+        self.start(root)
+        (root / 'code.py').write_text('still watching\n')
+        self.assertIn('-before\n+still watching', self.event())
 
     def test_subdirectory_scope_does_not_expand_to_the_whole_repo(self):
         root = self.repo('repo')
