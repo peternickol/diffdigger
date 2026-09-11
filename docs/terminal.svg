@@ -2,120 +2,120 @@
 <title>Diffdigger terminal preview — sample events</title>
 <rect width="894" height="972" rx="12" fill="#1a1b26"/>
 <text x="42" y="32" fill="#848fae" font-family="sans-serif" font-size="12">TERMINAL PREVIEW · SAMPLE EVENTS</text>
-<text x="42" y="70" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────╮</text>
-<text x="42" y="92" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="92" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="99" lengthAdjust="spacingAndGlyphs"> DIFFDIGGER</text>
-<text x="150" y="92" fill="#9ece6a" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="693" lengthAdjust="spacingAndGlyphs">                                                                      ● LIVE </text>
-<text x="843" y="92" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="114" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="114" fill="#7aa2f7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="90" lengthAdjust="spacingAndGlyphs"> demo-repo</text>
-<text x="843" y="114" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="136" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="136" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="189" lengthAdjust="spacingAndGlyphs"> ~/projects/demo-repo</text>
-<text x="843" y="136" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="158" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">├────────────────────────────────────────────────────────────────────────────────────────┤</text>
-<text x="42" y="180" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="180" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="522" lengthAdjust="spacingAndGlyphs"> File diffs · Git activity when available · Ctrl+C to stop</text>
-<text x="843" y="180" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="202" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────╯</text>
-<text x="42" y="246" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="216" lengthAdjust="spacingAndGlyphs">Watching for file saves…</text>
-<text x="42" y="290" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────╮</text>
-<text x="42" y="312" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="312" fill="#7aa2f7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs"> MODIFIED</text>
-<text x="132" y="312" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="711" lengthAdjust="spacingAndGlyphs">                                                                      14:32:08 </text>
-<text x="843" y="312" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="334" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="334" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="180" lengthAdjust="spacingAndGlyphs"> src/lessons/save.ts</text>
-<text x="771" y="334" fill="#9ece6a" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="27" lengthAdjust="spacingAndGlyphs"> +6</text>
-<text x="798" y="334" fill="#f7768e" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="45" lengthAdjust="spacingAndGlyphs">  −2 </text>
-<text x="843" y="334" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="356" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">├────────────────────────────────────────────────────────────────────────────────────────┤</text>
-<text x="42" y="378" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="378" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="144" lengthAdjust="spacingAndGlyphs"> @@ −1,5 +1,9 @@</text>
-<text x="843" y="378" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="400" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   1   1 </text>
-<text x="132" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="141" y="400" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs">   export async function saveLesson(input) {                                  </text>
-<text x="843" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="422" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   2     </text>
-<text x="132" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="406" width="702" height="22" fill="#35212b"/>
-<text x="141" y="422" fill="#ff9eac" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> −   const timeout = 1000;                                                    </text>
-<text x="843" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="444" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   3     </text>
-<text x="132" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="428" width="702" height="22" fill="#35212b"/>
-<text x="141" y="444" fill="#ff9eac" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> −   const payload = input;                                                   </text>
-<text x="843" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="466" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       2 </text>
-<text x="132" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="450" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="466" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +   const timeout = 5000;                                                    </text>
-<text x="843" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="488" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       3 </text>
-<text x="132" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="472" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="488" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +   const payload = validateLesson(input);                                   </text>
-<text x="843" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="510" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       4 </text>
-<text x="132" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="494" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="510" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +                                                                            </text>
-<text x="843" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="532" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       5 </text>
-<text x="132" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="516" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="532" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +   if (!payload.title) {                                                    </text>
-<text x="843" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="554" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       6 </text>
-<text x="132" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="538" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="554" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +     throw new Error(&quot;A lesson needs a title&quot;);                             </text>
-<text x="843" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="576" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       7 </text>
-<text x="132" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<rect x="141" y="560" width="702" height="22" fill="#1e2f27"/>
-<text x="141" y="576" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs"> +   }                                                                        </text>
-<text x="843" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="598" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   4   8 </text>
-<text x="132" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="141" y="598" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs">     return client.post(&quot;/lessons&quot;, payload, { timeout });                    </text>
-<text x="843" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="620" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   5   9 </text>
-<text x="132" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="141" y="620" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="702" lengthAdjust="spacingAndGlyphs">   }                                                                          </text>
-<text x="843" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="642" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────╯</text>
-<text x="42" y="686" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────╮</text>
-<text x="42" y="708" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="708" fill="#bb9af7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="117" lengthAdjust="spacingAndGlyphs"> GIT / COMMIT</text>
-<text x="168" y="708" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="675" lengthAdjust="spacingAndGlyphs">                                                                  14:32:08 </text>
-<text x="843" y="708" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="730" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="730" fill="#bb9af7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs"> 8fa421c9</text>
-<text x="843" y="730" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="752" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="752" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="279" lengthAdjust="spacingAndGlyphs"> Validate lessons before saving</text>
-<text x="843" y="752" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="774" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────╯</text>
-<text x="42" y="818" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────╮</text>
-<text x="42" y="840" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="840" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="99" lengthAdjust="spacingAndGlyphs"> GIT / PUSH</text>
-<text x="150" y="840" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="693" lengthAdjust="spacingAndGlyphs">                                                                    14:32:08 </text>
-<text x="843" y="840" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="862" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="51" y="862" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="207" lengthAdjust="spacingAndGlyphs"> origin/main → 8fa421c9</text>
-<text x="843" y="862" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
-<text x="42" y="884" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="810" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="70" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="24" y="92" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="92" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="99" lengthAdjust="spacingAndGlyphs"> DIFFDIGGER</text>
+<text x="132" y="92" fill="#9ece6a" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="729" lengthAdjust="spacingAndGlyphs">                                                                          ● LIVE </text>
+<text x="861" y="92" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="114" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="114" fill="#7aa2f7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="90" lengthAdjust="spacingAndGlyphs"> demo-repo</text>
+<text x="861" y="114" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="136" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="136" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="189" lengthAdjust="spacingAndGlyphs"> ~/projects/demo-repo</text>
+<text x="861" y="136" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="158" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">├────────────────────────────────────────────────────────────────────────────────────────────┤</text>
+<text x="24" y="180" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="180" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="522" lengthAdjust="spacingAndGlyphs"> File diffs · Git activity when available · Ctrl+C to stop</text>
+<text x="861" y="180" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="202" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="246" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="216" lengthAdjust="spacingAndGlyphs">Watching for file saves…</text>
+<text x="24" y="290" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="24" y="312" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="312" fill="#7aa2f7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs"> MODIFIED</text>
+<text x="114" y="312" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="747" lengthAdjust="spacingAndGlyphs">                                                                          14:32:08 </text>
+<text x="861" y="312" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="334" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="334" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="180" lengthAdjust="spacingAndGlyphs"> src/lessons/save.ts</text>
+<text x="789" y="334" fill="#9ece6a" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="27" lengthAdjust="spacingAndGlyphs"> +6</text>
+<text x="816" y="334" fill="#f7768e" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="45" lengthAdjust="spacingAndGlyphs">  −2 </text>
+<text x="861" y="334" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="356" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">├────────────────────────────────────────────────────────────────────────────────────────────┤</text>
+<text x="24" y="378" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="378" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="144" lengthAdjust="spacingAndGlyphs"> @@ −1,5 +1,9 @@</text>
+<text x="861" y="378" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="400" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   1   1 </text>
+<text x="114" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="123" y="400" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs">   export async function saveLesson(input) {                                      </text>
+<text x="861" y="400" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="422" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   2     </text>
+<text x="114" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="406" width="738" height="22" fill="#35212b"/>
+<text x="123" y="422" fill="#ff9eac" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> −   const timeout = 1000;                                                        </text>
+<text x="861" y="422" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="444" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   3     </text>
+<text x="114" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="428" width="738" height="22" fill="#35212b"/>
+<text x="123" y="444" fill="#ff9eac" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> −   const payload = input;                                                       </text>
+<text x="861" y="444" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="466" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       2 </text>
+<text x="114" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="450" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="466" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +   const timeout = 5000;                                                        </text>
+<text x="861" y="466" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="488" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       3 </text>
+<text x="114" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="472" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="488" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +   const payload = validateLesson(input);                                       </text>
+<text x="861" y="488" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="510" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       4 </text>
+<text x="114" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="494" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="510" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +                                                                                </text>
+<text x="861" y="510" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="532" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       5 </text>
+<text x="114" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="516" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="532" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +   if (!payload.title) {                                                        </text>
+<text x="861" y="532" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="554" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       6 </text>
+<text x="114" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="538" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="554" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +     throw new Error(&quot;A lesson needs a title&quot;);                                 </text>
+<text x="861" y="554" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="576" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">       7 </text>
+<text x="114" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<rect x="123" y="560" width="738" height="22" fill="#1e2f27"/>
+<text x="123" y="576" fill="#b6e090" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs"> +   }                                                                            </text>
+<text x="861" y="576" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="598" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   4   8 </text>
+<text x="114" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="123" y="598" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs">     return client.post(&quot;/lessons&quot;, payload, { timeout });                        </text>
+<text x="861" y="598" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="620" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs">   5   9 </text>
+<text x="114" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="123" y="620" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="738" lengthAdjust="spacingAndGlyphs">   }                                                                              </text>
+<text x="861" y="620" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="642" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="686" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="24" y="708" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="708" fill="#bb9af7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="117" lengthAdjust="spacingAndGlyphs"> GIT / COMMIT</text>
+<text x="150" y="708" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="711" lengthAdjust="spacingAndGlyphs">                                                                      14:32:08 </text>
+<text x="861" y="708" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="730" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="730" fill="#bb9af7" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="81" lengthAdjust="spacingAndGlyphs"> 8fa421c9</text>
+<text x="861" y="730" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="752" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="752" fill="#c0caf5" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="279" lengthAdjust="spacingAndGlyphs"> Validate lessons before saving</text>
+<text x="861" y="752" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="774" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────────╯</text>
+<text x="24" y="818" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╭────────────────────────────────────────────────────────────────────────────────────────────╮</text>
+<text x="24" y="840" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="840" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="700" xml:space="preserve" textLength="99" lengthAdjust="spacingAndGlyphs"> GIT / PUSH</text>
+<text x="132" y="840" fill="#848fae" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="729" lengthAdjust="spacingAndGlyphs">                                                                        14:32:08 </text>
+<text x="861" y="840" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="862" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="33" y="862" fill="#7dcfff" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="207" lengthAdjust="spacingAndGlyphs"> origin/main → 8fa421c9</text>
+<text x="861" y="862" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="9" lengthAdjust="spacingAndGlyphs">│</text>
+<text x="24" y="884" fill="#414868" font-family="JetBrains Mono,monospace" font-size="15" font-weight="400" xml:space="preserve" textLength="846" lengthAdjust="spacingAndGlyphs">╰────────────────────────────────────────────────────────────────────────────────────────────╯</text>
 </svg>

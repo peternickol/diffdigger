@@ -81,7 +81,8 @@ diffdigger
 NO_COLOR=1 ./diffdigger /path/to/folder
 ```
 
-Interactive terminals show decorated cards. Redirected output and very narrow
+Interactive terminals show cards across the full terminal width, adapting new
+output when you resize the window. Redirected output and very narrow
 terminals use a plain layout automatically. `--plain` disables both cards and
 colors; `NO_COLOR=1` disables colors.
 

@@ -244,6 +244,17 @@ def wrap_cells(text, width):
     yield line
 
 
+def terminal_columns(stream, columns=None):
+    if columns is None:
+        try:
+            columns = os.get_terminal_size(stream.fileno()).columns
+        except (AttributeError, OSError, ValueError):
+            columns = 0
+        if not columns:
+            columns = shutil.get_terminal_size((100, 24)).columns
+    return max(1, columns)
+
+
 class StartupProgress:
     """Show baseline work without writing progress into the diff stream."""
     def __init__(self, plain=False, stream=None, columns=None):
@@ -271,7 +282,7 @@ class StartupProgress:
 
     def write(self, text, final=False):
         if self.interactive:
-            width = max(1, (self.columns or shutil.get_terminal_size((100, 24)).columns) - 1)
+            width = terminal_columns(self.stream, self.columns)
             if cell_width(text) > width:
                 text = next(wrap_cells(text, width - 1)) + '…' if width > 1 else '…'
             print('\r\033[2K' + text, end='\n' if final else '', file=self.stream, flush=True)
@@ -322,7 +333,7 @@ class Terminal:
 
     @property
     def width(self):
-        return min(112, (self.columns or shutil.get_terminal_size((100, 24)).columns) - 4)
+        return terminal_columns(self.stream, self.columns)
 
     @property
     def pretty(self):
@@ -336,13 +347,13 @@ class Terminal:
         print(text, file=self.stream)
 
     def border(self, left='╭', right='╮'):
-        self.line('  ' + self.paint(left + '─' * (self.width - 2) + right, 'border'))
+        self.line(self.paint(left + '─' * (self.width - 2) + right, 'border'))
 
     def row(self, *spans):
         used = sum(cell_width(span[0]) for span in spans)
         content = ''.join(self.paint(span[0], span[1], len(span) > 2 and span[2]) for span in spans)
         edge = self.paint('│', 'border')
-        self.line('  ' + edge + content + ' ' * max(0, self.width - 2 - used) + edge)
+        self.line(edge + content + ' ' * max(0, self.width - 2 - used) + edge)
 
     def paragraph(self, text, style='text'):
         for line in wrap_cells(text, self.width - 4):
@@ -370,7 +381,7 @@ class Terminal:
         self.border('├', '┤')
         self.paragraph('File diffs · Git activity when available · Ctrl+C to stop', 'muted')
         self.close()
-        self.line('  ' + self.paint('Watching for file saves…', 'muted'))
+        self.line(self.paint('Watching for file saves…', 'muted'))
         self.line()
         self.stream.flush()
 

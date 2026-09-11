@@ -104,7 +104,7 @@ class TerminalTest(unittest.TestCase):
         self.assertNotIn('Baseline ready', output)
         self.assertTrue(output.endswith('\r\x1b[2K'))
         for frame in output.split('\r'):
-            self.assertLessEqual(APP['cell_width'](frame.replace('\x1b[2K', '')), 89)
+            self.assertLessEqual(APP['cell_width'](frame.replace('\x1b[2K', '')), 90)
 
     def test_plain_startup_progress_has_no_terminal_control_codes(self):
         stream = TTY()
