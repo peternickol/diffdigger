@@ -18,25 +18,24 @@ the downloads before installation.
    /tmp/diffdigger-release-check/bin/diffdigger /path/to/test-folder
    ```
 
-5. Review and commit the changes. Confirm the GitHub Actions test matrix passes,
-   including macOS, before claiming support for that release.
+5. Review and commit the changes. Record the platforms tested in the release notes.
 
 ## Publish
 
+Releases are built locally and uploaded manually; no CI is required.
 Push the reviewed commit, then create and push its matching `vX.Y.Z` Git tag.
-The workflow checks the tag against the source version, runs the tests, and
-creates a **draft** GitHub release containing:
+Create a GitHub release for that tag, use `docs/releases/vX.Y.Z.md` as its release
+notes, and attach these files from `dist/`:
 
 - `diffdigger`
 - `diffdigger-update` (the standalone installer/updater)
 - `LICENSE`
 - `SHA256SUMS`
 
-Ensure the repository is public, then review the draft and publish it manually.
-The public installation command starts
-working only after the first stable release is published. A tag or draft release
-alone is not sufficient. Leave released versions unchanged; publish a new version
-for fixes.
+Ensure the repository is public, then publish the release as a stable release.
+The public installation command starts working only after the first stable
+release is published. A tag or draft release alone is not sufficient. Leave
+released versions unchanged; publish a new version for fixes.
 
 After publication, test a fresh installation and `diffdigger --update` against the
 public assets. Local tests simulate the network responses, so this final check

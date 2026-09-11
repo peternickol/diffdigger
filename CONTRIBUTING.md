@@ -20,7 +20,7 @@ Installer tests use temporary directories and simulated GitHub responses. They
 do not download releases or modify your installed copy. When changing the terminal
 renderer, regenerate the example with `python3 tools/preview.py`.
 
-Tests run in GitHub Actions on Linux and macOS with Python 3.10 and 3.14. Keep the
-minimum supported Python version in mind when using standard-library APIs.
+Run checks locally before submitting changes. Keep the minimum supported Python
+version (3.10) in mind when using standard-library APIs.
 
 For publishing, see [the release instructions](docs/RELEASING.md).

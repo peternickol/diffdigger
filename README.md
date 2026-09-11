@@ -88,10 +88,9 @@ rm ~/.local/bin/diffdigger ~/.local/bin/diffdigger-update
 
 ### Platforms
 
-Linux is tested locally. CI is configured for Linux and macOS with Python 3.10
-and 3.14; check its results for the release you use. Native Windows installation
-is not supported; use WSL. A recent Git version is needed for optional Git
-activity and ignore filtering.
+Tested on Linux with Python 3.14. macOS is expected to work but has not been
+verified. Native Windows installation is not supported; use WSL. A recent Git
+version is needed for optional Git activity and ignore filtering.
 
 ## What you see
 
@@ -250,8 +249,7 @@ The generated image is [`docs/terminal.svg`](docs/terminal.svg).
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for bug reports and development, the
 [changelog](CHANGELOG.md) for versions, and [release instructions](docs/RELEASING.md)
-for publishing. The release workflow creates a draft after the test matrix passes;
-publication is a separate step.
+for building and publishing releases manually.
 
 ## License
 
