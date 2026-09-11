@@ -2,12 +2,21 @@
 
 A live stream of code diffs and Git activity in your terminal.
 
+![Diffdigger terminal preview with sample events](docs/terminal.svg)
+
 ```bash
 ./diffdigger ~/temp/electrologytraining.com
 ```
 
 Requires Python 3 and Git. No packages, server, configuration, or installation.
 Omit the directory to watch the current repository. Press **Ctrl+C** to stop.
+
+Interactive terminals show file cards with timestamps, old/new line numbers,
+change counts, and tinted diff rows. Git events have distinct colored cards.
+Long lines wrap, and earlier events stay in your terminal's scrollback.
+
+Use `--plain` for compact unified diffs. Redirected output and very narrow
+terminals use the plain layout automatically. `NO_COLOR=1` disables colors.
 
 The current files become the starting baseline. Each subsequent save prints its
 diff against the previously observed contents, with green additions and red
@@ -41,3 +50,4 @@ files over 1 MiB get a change summary. Only saved changes after startup appear.
 Diffdigger reads files and keeps its baseline in memory. It never changes your repo.
 
 Run the tests with `python3 -m unittest -v`.
+Regenerate the sample terminal preview with `python3 tools/preview.py`.

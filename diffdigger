@@ -5,10 +5,12 @@ import difflib
 import hashlib
 import os
 from pathlib import Path
+import shutil
 import stat
 import subprocess
 import sys
 import time
+import unicodedata
 
 INTERVAL = 0.5
 MAX_BYTES = 1024 * 1024
@@ -88,7 +90,7 @@ class GitActivity:
         self.positions[path] = (info[:2], position + end)
         return data[:end].splitlines()
 
-    def poll(self, color):
+    def poll(self, renderer):
         events = []
         for path, ref in self.logs():
             for line in self.read(path):
@@ -118,9 +120,7 @@ class GitActivity:
             events.append((time.time(), 'fetch', 'FETCH/PULL activity · FETCH_HEAD updated'))
         self.fetched = fetched
         for occurred, command, text in sorted(events, key=lambda event: event[0]):
-            line = f'[{time.strftime("%H:%M:%S", time.localtime(occurred))}] Git {filename(text)}'
-            print(f'\033[1;35m{line}\033[0m' if color else line)
-            print(flush=True)
+            renderer.git_event(occurred, text)
 
 
 def snapshot(root, previous):
@@ -165,16 +165,17 @@ def snapshot(root, previous):
     return current
 
 
-def show(name, before, after, color):
+def show(name, before, after, color, stream=None):
+    stream = stream if stream is not None else sys.stdout
     def paint(text, code):
         return f'\033[{code}m{text}\033[0m' if color else text
 
     action = 'Created' if before is None else 'Deleted' if after is None else 'Modified'
     name = filename(name)
-    print(paint(f'[{time.strftime("%H:%M:%S")}] {action} {name}', '1;36'))
+    print(paint(f'[{time.strftime("%H:%M:%S")}] {action} {name}', '1;36'), file=stream)
     unavailable = [item[3] for item in (before, after) if item is not None and item[1] is None]
     if unavailable:
-        print('; '.join(dict.fromkeys(unavailable)))
+        print('; '.join(dict.fromkeys(unavailable)), file=stream)
     else:
         old = before[1] if before else ''
         new = after[1] if after else ''
@@ -185,26 +186,191 @@ def show(name, before, after, color):
         )
         for line in lines:
             code = '32' if line.startswith('+') else '31' if line.startswith('-') else '36' if line.startswith('@@') else '0'
-            print(paint(safe(line).rstrip('\n'), code))
+            print(paint(safe(line).rstrip('\n'), code), file=stream)
             if not line.endswith('\n'):
-                print('\\ No newline at end of file')
-    print(flush=True)
+                print('\\ No newline at end of file', file=stream)
+    print(file=stream, flush=True)
+
+
+def cell_width(text):
+    return sum(0 if unicodedata.combining(c) or unicodedata.category(c) in ('Cf', 'Mn', 'Me')
+               else 2 if unicodedata.east_asian_width(c) in ('W', 'F') else 1 for c in text)
+
+
+def wrap_cells(text, width):
+    line, used = '', 0
+    for character in text.expandtabs(4):
+        size = cell_width(character)
+        if used + size > width and line:
+            yield line
+            line, used = '', 0
+        line += character
+        used += size
+    yield line
+
+
+class Terminal:
+    COLORS = {
+        'text': '38;2;192;202;245', 'muted': '38;2;132;143;174',
+        'border': '38;2;65;72;104', 'blue': '38;2;122;162;247',
+        'green': '38;2;158;206;106', 'red': '38;2;247;118;142',
+        'purple': '38;2;187;154;247', 'cyan': '38;2;125;207;255',
+        'added': '38;2;182;224;144;48;2;30;47;39',
+        'removed': '38;2;255;158;172;48;2;53;33;43',
+    }
+
+    def __init__(self, plain=False, stream=None, columns=None):
+        self.stream = stream if stream is not None else sys.stdout
+        self.columns = columns
+        self.tty = self.stream.isatty() and os.environ.get('TERM') != 'dumb' and not plain
+        self.color = self.tty and 'NO_COLOR' not in os.environ
+
+    @property
+    def width(self):
+        return min(112, (self.columns or shutil.get_terminal_size((100, 24)).columns) - 4)
+
+    @property
+    def pretty(self):
+        return self.tty and self.width >= 46
+
+    def paint(self, text, style='text', bold=False):
+        code = self.COLORS[style] + (';1' if bold else '')
+        return f'\033[{code}m{text}\033[0m' if self.color else text
+
+    def line(self, text=''):
+        print(text, file=self.stream)
+
+    def border(self, left='╭', right='╮'):
+        self.line('  ' + self.paint(left + '─' * (self.width - 2) + right, 'border'))
+
+    def row(self, *spans):
+        used = sum(cell_width(span[0]) for span in spans)
+        content = ''.join(self.paint(span[0], span[1], len(span) > 2 and span[2]) for span in spans)
+        edge = self.paint('│', 'border')
+        self.line('  ' + edge + content + ' ' * max(0, self.width - 2 - used) + edge)
+
+    def paragraph(self, text, style='text'):
+        for line in wrap_cells(text, self.width - 4):
+            self.row((' ' + line, style))
+
+    def header(self, label, clock, style, clock_style='muted'):
+        self.border()
+        gap = self.width - 4 - cell_width(label) - cell_width(clock)
+        self.row((' ' + label, style, True), (' ' * gap + clock + ' ', clock_style))
+
+    def close(self):
+        self.border('╰', '╯')
+        self.line()
+        self.stream.flush()
+
+    def start(self, root):
+        if not self.pretty:
+            print(f'Diffdigger · {root}', file=sys.stderr)
+            print('Ready. Watching file saves and Git activity. Ctrl+C to stop.', file=sys.stderr, flush=True)
+            return
+        self.line()
+        self.header('DIFFDIGGER', '● LIVE', 'cyan', 'green')
+        self.paragraph(filename(root.name), 'blue')
+        self.paragraph(filename(str(root).replace(str(Path.home()), '~', 1)), 'muted')
+        self.border('├', '┤')
+        self.paragraph('File diffs + Git activity   ·   Ctrl+C to stop', 'muted')
+        self.close()
+        self.line('  ' + self.paint('Watching for saves and Git activity…', 'muted'))
+        self.line()
+        self.stream.flush()
+
+    def git_event(self, occurred, text):
+        clock = time.strftime('%H:%M:%S', time.localtime(occurred))
+        text = filename(text)
+        if not self.pretty:
+            self.line(f'[{clock}] Git {text}')
+            self.line()
+            self.stream.flush()
+            return
+        action, _, detail = text.partition(' ')
+        style = {'COMMIT': 'purple', 'PUSH': 'cyan', 'PULL': 'blue', 'FETCH': 'green'}.get(action, 'muted')
+        self.header('GIT / ' + action, clock, style)
+        reference, separator, message = detail.partition(' · ')
+        self.paragraph(reference, style)
+        if separator and message:
+            self.paragraph(message)
+        self.close()
+
+    def file_event(self, name, before, after):
+        if not self.pretty:
+            show(name, before, after, self.color, self.stream)
+            return
+        action = 'CREATED' if before is None else 'DELETED' if after is None else 'MODIFIED'
+        accent = 'green' if before is None else 'red' if after is None else 'blue'
+        unavailable = [item[3] for item in (before, after) if item is not None and item[1] is None]
+        old = (before[1] if before and before[1] is not None else '').splitlines(keepends=True)
+        new = (after[1] if after and after[1] is not None else '').splitlines(keepends=True)
+        matcher = difflib.SequenceMatcher(None, old, new)
+        operations = matcher.get_opcodes()
+        added = sum(j2 - j1 for tag, i1, i2, j1, j2 in operations if tag in ('insert', 'replace'))
+        removed = sum(i2 - i1 for tag, i1, i2, j1, j2 in operations if tag in ('delete', 'replace'))
+        self.header(action, time.strftime('%H:%M:%S'), accent)
+        name = filename(name)
+        counts = f'+{added}  −{removed}' if not unavailable else ''
+        if cell_width(name) + cell_width(counts) + 3 <= self.width - 2:
+            padding = self.width - 5 - cell_width(name) - cell_width(counts)
+            self.row((' ' + name, 'text', True), (' ' * padding, 'text'),
+                     (f' +{added}', 'green') if counts else ('', 'text'),
+                     (f'  −{removed} ', 'red') if counts else ('', 'text'))
+        else:
+            self.paragraph(name)
+            if counts:
+                self.row((f' +{added}', 'green'), (f'  −{removed}', 'red'))
+        self.border('├', '┤')
+        if unavailable:
+            for detail in dict.fromkeys(unavailable):
+                self.paragraph(detail, 'muted')
+        elif not old and not new:
+            self.paragraph('Empty file', 'muted')
+        else:
+            digits = max(3, len(str(max(len(old), len(new)))))
+            body_width = self.width - 2 * digits - 9
+            for group in matcher.get_grouped_opcodes(3):
+                first, last = group[0], group[-1]
+                old_count, new_count = last[2] - first[1], last[4] - first[3]
+                hunk = f'@@ −{first[1] + bool(old_count)},{old_count} +{first[3] + bool(new_count)},{new_count} @@'
+                self.paragraph(hunk, 'muted')
+                for tag, i1, i2, j1, j2 in group:
+                    rows = []
+                    if tag == 'equal':
+                        rows = [(i + 1, j1 + i - i1 + 1, ' ', old[i]) for i in range(i1, i2)]
+                    else:
+                        if tag in ('delete', 'replace'):
+                            rows.extend((i + 1, '', '−', old[i]) for i in range(i1, i2))
+                        if tag in ('insert', 'replace'):
+                            rows.extend(('', j + 1, '+', new[j]) for j in range(j1, j2))
+                    for left, right, sign, line in rows:
+                        style = 'added' if sign == '+' else 'removed' if sign == '−' else 'text'
+                        for index, part in enumerate(wrap_cells(safe(line.rstrip('\n')), body_width)):
+                            a, b = (str(left), str(right)) if index == 0 else ('', '')
+                            marker = sign if index == 0 else '↳'
+                            gutter = f' {a:>{digits}} {b:>{digits}} '
+                            padded = part + ' ' * (body_width - cell_width(part))
+                            self.row((gutter, 'muted'), ('│', 'border'), (f' {marker} {padded}', style))
+                        if not line.endswith('\n'):
+                            self.paragraph('↳ No newline at end of file', 'muted')
+        self.close()
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('directory', nargs='?', default='.', help='Repository to watch (default: current directory)')
+    parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
     args = parser.parse_args()
     root = Path(args.directory).expanduser().resolve()
     root = Path(os.fsdecode(git(root, 'rev-parse', '--show-toplevel')).rstrip('\n'))
-    print(f'Diffdigger · {root}', file=sys.stderr)
+    renderer = Terminal(plain=args.plain)
     activity = GitActivity(root)
     previous = snapshot(root, {})
-    print('Ready. Watching file saves and Git activity. Ctrl+C to stop.', file=sys.stderr, flush=True)
-    color = sys.stdout.isatty() and 'NO_COLOR' not in os.environ
+    renderer.start(root)
     while True:
         time.sleep(INTERVAL)
-        activity.poll(color)
+        activity.poll(renderer)
         current = snapshot(root, previous)
         for name in sorted(previous.keys() | current.keys()):
             before, after = previous.get(name), current.get(name)
@@ -212,7 +378,7 @@ def main():
                 continue
             if after is None and (root / name).exists():
                 continue  # A newly ignored file is not a deleted file.
-            show(name, before, after, color)
+            renderer.file_event(name, before, after)
         previous = current
 
 
