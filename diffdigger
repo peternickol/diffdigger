@@ -391,23 +391,28 @@ class Terminal:
         self.close()
 
 
-def repositories(directories, all_repos=False):
+def repository_root(path):
+    return Path(os.fsdecode(git(path, 'rev-parse', '--show-toplevel')).rstrip('\n')).resolve()
+
+
+def repositories(directories):
     roots = {}
     for directory in directories:
         path = Path(directory).expanduser().resolve()
         if not path.is_dir():
             raise RuntimeError(f'Not a directory: {path}')
-        if all_repos:
-            # Scan only direct children, never dependencies or nested repos.
+        try:
+            root = repository_root(path)
+        except RuntimeError:
+            # Outside a checkout, look for repos directly inside the directory.
             candidates = [child for child in sorted(path.iterdir())
                           if not child.is_symlink() and child.is_dir() and (child / '.git').exists()]
+            if not candidates:
+                raise RuntimeError(f'No repositories found in {path} or its immediate subdirectories.') from None
+            for candidate in candidates:
+                roots[repository_root(candidate)] = None
         else:
-            candidates = [path]
-        for candidate in candidates:
-            root = Path(os.fsdecode(git(candidate, 'rev-parse', '--show-toplevel')).rstrip('\n')).resolve()
             roots[root] = None
-    if not roots:
-        raise RuntimeError('No repositories found in the immediate child directories.')
     return list(roots)
 
 
@@ -442,13 +447,12 @@ class Watcher:
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('directories', nargs='*', help='Repositories to watch (default: current directory)')
-    parser.add_argument('--all', action='store_true', help='Watch repositories in each directory\'s immediate subdirectories')
+    parser.add_argument('directories', nargs='*', help='Repositories or folders containing repos (default: current directory)')
     parser.add_argument('--plain', action='store_true', help='Use plain unified diffs without terminal cards')
     args = parser.parse_args()
-    roots = repositories(args.directories or ['.'], args.all)
+    roots = repositories(args.directories or ['.'])
     labels = repository_labels(roots)
-    multiple = args.all or len(roots) > 1
+    multiple = len(roots) > 1
     watchers = [Watcher(root, Terminal(plain=args.plain, repo=labels[root] if multiple else None))
                 for root in roots]
     renderer = Terminal(plain=args.plain)

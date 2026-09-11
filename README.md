@@ -27,11 +27,14 @@ cd diffdigger
 
 Use the path to the repository you want to watch. Press **Ctrl+C** to stop.
 
-To watch all repositories directly inside a folder:
+Or pass a folder containing repositories:
 
 ```bash
-./diffdigger --all ~/temp
+./diffdigger ~/temp
 ```
+
+Omit the path to watch from your current directory. Diffdigger automatically
+watches the checkout you're in, or finds repositories directly inside the folder.
 
 ## What you see
 
@@ -49,7 +52,7 @@ To watch all repositories directly inside a folder:
 ## Usage
 
 ```text
-diffdigger [--plain] [--all] [directory ...]
+diffdigger [--plain] [directory ...]
 ```
 
 Run the executable by its path, or put it on your `PATH` to use `diffdigger`
@@ -63,9 +66,9 @@ from anywhere. With no directory argument, it uses the current directory.
 ./diffdigger ~/projects/my-app ~/projects/api
 
 # Watch all repositories directly inside a folder
-./diffdigger --all ~/temp
+./diffdigger ~/temp
 
-# Watch the current repository (when diffdigger is on PATH)
+# Watch from the current directory (when diffdigger is on PATH)
 diffdigger
 
 # Use compact unified diffs without cards or colors
@@ -81,14 +84,16 @@ colors; `NO_COLOR=1` disables colors.
 
 ### Watching a folder of repositories
 
-`--all` finds repositories in the given folder's **immediate subdirectories**,
-including linked worktrees. It watches those checkouts together, even if the
-parent folder is itself a Git repository. The parent checkout is excluded.
-You can pass several parent folders after `--all`.
+If the directory is a Git checkout, or is inside one, Diffdigger watches that
+repository. Otherwise, it finds repositories in the folder's **immediate
+subdirectories**, including linked worktrees, and watches them together. The same
+rule applies when you omit the path and use the current directory.
+
+You can pass several paths, mixing repositories and folders containing repos.
 
 Discovery runs at startup. Restart to pick up newly cloned repositories. It does
 not recurse into subfolders, follow symlinked directories, or include bare repos.
-To include a deeper checkout, pass its path directly without `--all`.
+To include a deeper checkout, pass its path directly.
 
 Repeated paths to the same checkout are watched once. Events normally use the
 repository's folder name; if names collide, they show the full paths. If a watched

@@ -34,10 +34,10 @@ class RepositoriesTest(unittest.TestCase):
         self.git(root, 'commit', '-qm', 'baseline')
         return root
 
-    def start(self, *args):
+    def start(self, *args, cwd=None):
         process = subprocess.Popen(
             [sys.executable, str(SCRIPT), *map(str, args)],
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, cwd=cwd,
         )
         def stop():
             if process.poll() is None:
@@ -71,16 +71,14 @@ class RepositoriesTest(unittest.TestCase):
             self.output.get(timeout=0.8)
         self.assertIsNone(self.process.poll())
 
-    def test_all_discovers_children_and_keeps_diffs_and_commits_separate(self):
-        # A container can itself be a checkout, as ~/temp is on the user's machine.
-        self.repo('.')
+    def test_current_directory_discovers_children_and_keeps_feeds_separate(self):
         alpha = self.repo('alpha', 'alpha baseline\n')
         beta = self.repo('beta', 'beta baseline\n')
         self.repo('group/nested')
         (self.parent / 'alias').symlink_to(alpha, target_is_directory=True)
         self.git(self.parent, 'init', '--bare', '-q', str(self.parent / 'remote.git'))
-        self.assertEqual(APP['repositories']([self.parent], True), [alpha, beta])
-        banner = self.start('--all', self.parent)
+        self.assertEqual(APP['repositories']([self.parent]), [alpha, beta])
+        banner = self.start(cwd=self.parent)
         self.assertIn('2 repositories', banner)
         self.quiet()  # Startup must not replay either checkout's baseline commit.
 
@@ -105,6 +103,18 @@ class RepositoriesTest(unittest.TestCase):
         self.assertIn('-alpha saved\n+alpha next', self.event())
         self.quiet()
 
+    def test_current_checkout_takes_precedence_over_child_repositories(self):
+        root = self.repo('.')
+        self.repo('child')
+        self.assertEqual(APP['repositories']([root]), [root])
+        banner = self.start(cwd=root)
+        self.assertIn(f'Diffdigger · {root}', banner)
+        (root / 'code.py').write_text('current checkout\n')
+        event = self.event()
+        self.assertIn('Modified code.py', event)
+        self.assertIn('-before\n+current checkout', event)
+        self.quiet()
+
     def test_explicit_paths_deduplicate_checkouts_and_disambiguate_names(self):
         first = self.repo('team one/app')
         second = self.repo('team two/app')
@@ -124,8 +134,8 @@ class RepositoriesTest(unittest.TestCase):
         worktree = self.parent / 'agent-worktree'
         self.git(root, 'worktree', 'add', '-qb', 'agent', str(worktree))
         self.assertTrue((worktree / '.git').is_file())
-        self.assertEqual(APP['repositories']([self.parent], True), [worktree, root])
-        self.start('--all', self.parent)
+        self.assertEqual(APP['repositories']([self.parent]), [worktree, root])
+        self.start(self.parent)
         (worktree / 'code.py').write_text('agent save\n')
         event = self.event()
         self.assertIn('[agent-worktree] Modified code.py', event)
@@ -138,7 +148,7 @@ class RepositoriesTest(unittest.TestCase):
     def test_unavailable_repo_does_not_stop_other_feeds(self):
         alpha = self.repo('alpha')
         beta = self.repo('beta')
-        self.start('--all', self.parent)
+        self.start(self.parent)
         hidden = self.parent / 'alpha-moved'
         os.rename(alpha, hidden)
         error = self.messages.get(timeout=5)
@@ -156,9 +166,9 @@ class RepositoriesTest(unittest.TestCase):
         self.assertIn('-before\n+returned', event)
         self.assertIn('[alpha] Watching again.', self.messages.get(timeout=5))
 
-    def test_all_without_child_repositories_has_a_clear_error(self):
+    def test_directory_without_repositories_has_a_clear_error(self):
         result = subprocess.run(
-            [sys.executable, str(SCRIPT), '--all', str(self.parent)],
+            [sys.executable, str(SCRIPT), str(self.parent)],
             capture_output=True, text=True, timeout=5,
         )
         self.assertEqual(result.returncode, 1)
